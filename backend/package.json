@@ -1,0 +1,13 @@
+{
+  "name": "usdc-escrow-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "bun run --watch src/index.ts",
+    "start": "bun run src/index.ts"
+  },
+  "dependencies": {
+    "hono": "^4.0.0",
+    "ethers": "^6.0.0"
+  }
+}
