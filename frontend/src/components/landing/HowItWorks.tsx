@@ -1,3 +1,6 @@
+import { motion } from 'motion/react';
+import { fadeUp, whileInViewProps } from '@/lib/motion';
+
 const steps = [
   {
     num: 1,
@@ -23,37 +26,26 @@ const steps = [
 
 export default function HowItWorks() {
   return (
-    <section className="py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center text-3xl font-bold text-white sm:text-4xl">
-          How It Works
-        </h2>
-        <p className="mt-4 text-center text-gray-400">
-          Four simple steps to secure your transactions
-        </p>
+    <section className="py-24 px-8 max-w-7xl mx-auto">
+      <h2 className="text-3xl font-bold text-foreground">How It Works</h2>
 
-        <div className="mt-16 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
-          {steps.map((step, i) => (
-            <div key={step.num} className="relative flex flex-col items-center text-center">
-              {/* Connector line */}
-              {i < steps.length - 1 && (
-                <div className="absolute left-[calc(50%+2rem)] top-6 hidden h-px w-[calc(100%-4rem)] bg-gradient-to-r from-blue-500/50 to-indigo-500/50 lg:block" />
-              )}
-
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-full border-2 border-blue-500/30 bg-blue-500/10 text-blue-400 font-bold text-lg">
-                {step.num}
-              </div>
-
-              <h3 className="mt-4 text-lg font-semibold text-white">
-                {step.title}
-              </h3>
-
-              <p className="mt-2 text-sm text-gray-400 leading-relaxed">
-                {step.desc}
-              </p>
+      <div className="border-l-2 border-accent/30 ml-6 pl-8 space-y-12 mt-12">
+        {steps.map((step) => (
+          <motion.div
+            key={step.num}
+            variants={fadeUp}
+            {...whileInViewProps}
+            className="relative"
+          >
+            <div className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-accent/30 text-accent text-sm font-semibold tabular-nums -ml-[2.8rem] bg-surface">
+              {step.num}
             </div>
-          ))}
-        </div>
+            <h3 className="text-lg font-semibold text-foreground mt-2">
+              {step.title}
+            </h3>
+            <p className="text-muted-foreground text-sm mt-1">{step.desc}</p>
+          </motion.div>
+        ))}
       </div>
     </section>
   );

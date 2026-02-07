@@ -1,30 +1,44 @@
+import { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
+import { cn } from '@/lib/utils';
 
 export default function Header() {
   const { pathname } = useLocation();
+  const [scrolled, setScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setScrolled(window.scrollY > 50);
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   const navLink = (to: string, label: string) => (
     <Link
       to={to}
-      className={`px-3 py-2 rounded-md text-sm font-medium transition-colors ${
+      className={cn(
+        'px-3 py-2 text-sm font-medium transition-opacity duration-150',
         pathname === to
-          ? 'text-white bg-white/10'
-          : 'text-gray-400 hover:text-white hover:bg-white/5'
-      }`}
+          ? 'text-foreground'
+          : 'text-muted-foreground hover:text-foreground'
+      )}
     >
       {label}
     </Link>
   );
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b border-gray-800 bg-dark-900/80 backdrop-blur-md">
+    <header
+      className={cn(
+        'fixed top-0 left-0 right-0 z-50 transition-colors duration-300',
+        scrolled ? 'backdrop-blur-xl bg-surface/60' : 'bg-transparent'
+      )}
+    >
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
-          <Link to="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600">
-              <span className="text-sm font-bold text-white">U</span>
-            </div>
-            <span className="text-lg font-bold text-white">USDC Escrow</span>
+          <Link to="/" className="flex items-center">
+            <span className="text-lg font-semibold text-foreground font-sans">
+              USDC Escrow
+            </span>
           </Link>
 
           <nav className="flex items-center gap-1">
@@ -33,7 +47,6 @@ export default function Header() {
           </nav>
         </div>
       </div>
-      <div className="h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent" />
     </header>
   );
 }

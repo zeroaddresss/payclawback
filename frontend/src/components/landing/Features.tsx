@@ -1,21 +1,26 @@
+import { motion } from 'motion/react';
+import { Shield, Activity, Link2, Brain } from 'lucide-react';
+import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { staggerContainer, fadeUp, whileInViewProps } from '@/lib/motion';
+
 const features = [
   {
-    icon: '\u2696\uFE0F',
+    icon: Shield,
     title: 'Autonomous Arbitration',
     desc: 'AI agent acts as impartial arbiter for dispute resolution',
   },
   {
-    icon: '\u26A1',
+    icon: Activity,
     title: 'Real-time Monitoring',
     desc: 'Live dashboard with WebSocket updates for all escrow activities',
   },
   {
-    icon: '\uD83D\uDD17',
+    icon: Link2,
     title: 'Agent-Native API',
     desc: 'RESTful API designed for AI agent integration with simple auth',
   },
   {
-    icon: '\uD83E\uDDE9',
+    icon: Brain,
     title: 'OpenClaw Integration',
     desc: 'Install as a skill for any OpenClaw-compatible agent',
   },
@@ -23,34 +28,31 @@ const features = [
 
 export default function Features() {
   return (
-    <section className="py-20 bg-dark-800/30">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center text-3xl font-bold text-white sm:text-4xl">
-          Features
-        </h2>
-        <p className="mt-4 text-center text-gray-400">
-          Built for the future of autonomous commerce
-        </p>
+    <section className="py-24 px-8 max-w-7xl mx-auto">
+      <h2 className="text-3xl font-bold text-foreground">Features</h2>
+      <p className="text-muted-foreground mt-2">
+        Built for the future of autonomous commerce
+      </p>
 
-        <div className="mt-16 grid grid-cols-1 gap-6 sm:grid-cols-2">
-          {features.map((f) => (
-            <div
-              key={f.title}
-              className="group rounded-xl border border-gray-800 bg-dark-800/50 p-6 transition-all hover:border-gray-700 hover:bg-dark-700/50"
-            >
-              <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/5 text-2xl">
-                {f.icon}
-              </div>
-              <h3 className="mt-4 text-lg font-semibold text-white">
-                {f.title}
-              </h3>
-              <p className="mt-2 text-sm text-gray-400 leading-relaxed">
-                {f.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <motion.div
+        className="grid grid-cols-1 sm:grid-cols-2 gap-6 mt-12"
+        variants={staggerContainer}
+        {...whileInViewProps}
+      >
+        {features.map((f) => (
+          <motion.div key={f.title} variants={fadeUp}>
+            <Card>
+              <CardHeader>
+                <div className="h-10 w-10 rounded-lg bg-accent/10 flex items-center justify-center text-accent">
+                  <f.icon className="h-5 w-5" />
+                </div>
+                <CardTitle className="mt-4">{f.title}</CardTitle>
+                <CardDescription>{f.desc}</CardDescription>
+              </CardHeader>
+            </Card>
+          </motion.div>
+        ))}
+      </motion.div>
     </section>
   );
 }

@@ -9,10 +9,11 @@ export const STATE_NAMES: Record<number, string> = {
   4: 'Expired',
 };
 
-export const STATE_COLORS: Record<number, string> = {
-  0: 'bg-green-500/20 text-green-400 border-green-500/30',
-  1: 'bg-blue-500/20 text-blue-400 border-blue-500/30',
-  2: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-  3: 'bg-red-500/20 text-red-400 border-red-500/30',
-  4: 'bg-gray-500/20 text-gray-400 border-gray-500/30',
+// Maps to Badge component variant prop
+export const STATE_VARIANTS: Record<number, 'accent' | 'default' | 'warm' | 'destructive' | 'secondary'> = {
+  0: 'accent',      // Active - teal
+  1: 'default',     // Released - primary
+  2: 'warm',        // Disputed - coral
+  3: 'destructive', // Refunded - red
+  4: 'secondary',   // Expired - muted
 };

@@ -1,4 +1,7 @@
 import { useState, useEffect } from 'react';
+import { motion } from 'motion/react';
+import { Card, CardHeader, CardContent, CardTitle } from '@/components/ui/card';
+import { staggerContainer, fadeUp, motionProps } from '../../lib/motion';
 import { fetchStats, type Stats } from '../../lib/api';
 import { formatUSDC } from '../../lib/formatters';
 
@@ -17,34 +20,42 @@ export default function StatsBar() {
     {
       label: 'Total Escrows',
       value: stats?.total ?? '--',
-      color: 'from-blue-500/20 to-blue-600/10',
-      border: 'border-blue-500/20',
+      accent: false,
     },
     {
       label: 'Total Volume',
       value: stats ? formatUSDC(stats.volume) : '--',
-      color: 'from-green-500/20 to-green-600/10',
-      border: 'border-green-500/20',
+      accent: true,
     },
     {
       label: 'Active Escrows',
       value: stats?.active ?? '--',
-      color: 'from-indigo-500/20 to-indigo-600/10',
-      border: 'border-indigo-500/20',
+      accent: false,
     },
   ];
 
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+    <motion.div
+      className="grid grid-cols-1 sm:grid-cols-3 gap-4"
+      {...motionProps}
+      variants={staggerContainer}
+    >
       {cards.map((c) => (
-        <div
-          key={c.label}
-          className={`rounded-xl border ${c.border} bg-gradient-to-br ${c.color} p-5`}
-        >
-          <p className="text-sm text-gray-400">{c.label}</p>
-          <p className="mt-1 text-2xl font-bold text-white">{c.value}</p>
-        </div>
+        <motion.div key={c.label} variants={fadeUp}>
+          <Card className={c.accent ? 'border-l-2 border-l-accent' : ''}>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm font-medium text-muted-foreground">
+                {c.label}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold tabular-nums font-sans text-foreground">
+                {c.value}
+              </div>
+            </CardContent>
+          </Card>
+        </motion.div>
       ))}
-    </div>
+    </motion.div>
   );
 }

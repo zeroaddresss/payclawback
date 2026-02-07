@@ -1,82 +1,75 @@
-function Box({ label, sub, accent }: { label: string; sub: string; accent: string }) {
-  return (
-    <div className={`rounded-lg border ${accent} bg-dark-800/80 px-4 py-3 text-center min-w-[120px]`}>
-      <div className="text-sm font-semibold text-white">{label}</div>
-      <div className="text-xs text-gray-500 mt-0.5">{sub}</div>
-    </div>
-  );
-}
+import { motion } from 'motion/react';
+import { Badge } from '@/components/ui/badge';
+import { fadeUp, whileInViewProps } from '@/lib/motion';
 
-function Arrow({ horizontal = true }: { horizontal?: boolean }) {
-  if (horizontal) {
-    return (
-      <div className="flex items-center px-2">
-        <div className="h-px w-8 bg-gradient-to-r from-gray-600 to-gray-500" />
-        <div className="border-t-[5px] border-b-[5px] border-l-[6px] border-transparent border-l-gray-500" />
-      </div>
-    );
-  }
-  return (
-    <div className="flex flex-col items-center py-1">
-      <div className="w-px h-6 bg-gradient-to-b from-gray-600 to-gray-500" />
-      <div className="border-l-[5px] border-r-[5px] border-t-[6px] border-transparent border-t-gray-500" />
-    </div>
-  );
-}
+const flow = [
+  { label: 'AI Agents', tech: 'OpenClaw' },
+  { label: 'Backend API', tech: 'Hono + Bun' },
+  { label: 'Smart Contract', tech: 'Solidity' },
+  { label: 'USDC Token', tech: 'Base L2' },
+];
 
-const techBadges = [
-  'Solidity', 'Base', 'USDC', 'Hono', 'Bun', 'React', 'ethers.js', 'Foundry',
+const techStack = [
+  'Solidity',
+  'Base',
+  'USDC',
+  'Hono',
+  'Bun',
+  'React',
+  'ethers.js',
+  'Foundry',
 ];
 
 export default function Architecture() {
   return (
-    <section className="py-20">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
-        <h2 className="text-center text-3xl font-bold text-white sm:text-4xl">
-          Architecture
-        </h2>
-        <p className="mt-4 text-center text-gray-400">
+    <section className="py-24 px-8 max-w-7xl mx-auto">
+      <motion.div variants={fadeUp} {...whileInViewProps}>
+        <h2 className="text-3xl font-bold text-foreground">Architecture</h2>
+        <p className="text-muted-foreground mt-2">
           How the system components connect
         </p>
 
-        {/* Architecture diagram */}
-        <div className="mt-12 flex flex-col items-center gap-2">
-          {/* Top row: Agents -> Backend -> Smart Contract -> USDC */}
-          <div className="flex items-center flex-wrap justify-center gap-0">
-            <Box label="AI Agents" sub="OpenClaw Skills" accent="border-indigo-500/30" />
-            <Arrow />
-            <Box label="Backend API" sub="Hono + Bun" accent="border-blue-500/30" />
-            <Arrow />
-            <Box label="Smart Contract" sub="USDCEscrow.sol" accent="border-green-500/30" />
-            <Arrow />
-            <Box label="USDC Token" sub="Base L2" accent="border-yellow-500/30" />
-          </div>
+        {/* Main flow */}
+        <div className="mt-12 flex flex-col sm:flex-row items-start sm:items-center gap-4 sm:gap-2 flex-wrap">
+          {flow.map((item, i) => (
+            <div key={item.label} className="flex items-center gap-2">
+              <div className="flex flex-col items-start gap-1">
+                <span className="text-foreground font-medium">{item.label}</span>
+                <Badge variant="secondary">{item.tech}</Badge>
+              </div>
+              {i < flow.length - 1 && (
+                <span className="text-muted-foreground text-lg hidden sm:inline ml-2">
+                  &rarr;
+                </span>
+              )}
+            </div>
+          ))}
+        </div>
 
-          {/* Connector from Frontend up to Backend */}
-          <Arrow horizontal={false} />
-
-          <div className="flex items-center gap-0">
-            <Box label="Frontend" sub="React + Vite" accent="border-blue-500/30" />
+        {/* Secondary connection */}
+        <div className="mt-6 flex items-center gap-2">
+          <div className="flex flex-col items-start gap-1">
+            <span className="text-foreground font-medium">Frontend</span>
+            <Badge variant="secondary">React + Vite</Badge>
           </div>
+          <span className="text-muted-foreground text-lg ml-2">&rarr;</span>
+          <span className="text-foreground font-medium ml-2">Backend API</span>
         </div>
 
         {/* Tech Stack */}
         <div className="mt-20">
-          <h3 className="text-center text-xl font-semibold text-white mb-8">
+          <h3 className="text-xl font-semibold text-foreground mb-6">
             Tech Stack
           </h3>
-          <div className="flex flex-wrap items-center justify-center gap-3">
-            {techBadges.map((tech) => (
-              <span
-                key={tech}
-                className="rounded-full border border-gray-700 bg-white/5 px-4 py-1.5 text-sm text-gray-300"
-              >
+          <div className="flex flex-wrap items-start gap-3">
+            {techStack.map((tech) => (
+              <Badge key={tech} variant="outline">
                 {tech}
-              </span>
+              </Badge>
             ))}
           </div>
         </div>
-      </div>
+      </motion.div>
     </section>
   );
 }

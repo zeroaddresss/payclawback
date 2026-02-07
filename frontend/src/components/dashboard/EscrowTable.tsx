@@ -1,17 +1,34 @@
 import { useEscrows } from '../../hooks/useEscrows';
-import { STATE_NAMES, STATE_COLORS } from '../../lib/constants';
+import { STATE_NAMES, STATE_VARIANTS } from '../../lib/constants';
 import { formatAddress, formatUSDC, formatDate } from '../../lib/formatters';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableRow,
+  TableHead,
+  TableCell,
+} from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 
 function LoadingSkeleton() {
   return (
-    <div className="space-y-3">
-      {Array.from({ length: 5 }).map((_, i) => (
-        <div
-          key={i}
-          className="h-12 animate-pulse rounded-lg bg-white/5"
-        />
-      ))}
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Escrows</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div
+              key={i}
+              className="h-12 animate-pulse rounded-md bg-muted/50"
+            />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -19,80 +36,74 @@ export default function EscrowTable() {
   const { escrows, loading, error } = useEscrows();
 
   if (loading) {
-    return (
-      <div className="rounded-xl border border-gray-800 bg-dark-800/50 p-6">
-        <h2 className="mb-4 text-lg font-semibold text-white">Escrows</h2>
-        <LoadingSkeleton />
-      </div>
-    );
+    return <LoadingSkeleton />;
   }
 
   if (error) {
     return (
-      <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-6">
-        <p className="text-red-400">Error loading escrows: {error}</p>
-      </div>
+      <Card className="border-destructive">
+        <CardContent className="p-6">
+          <p className="text-destructive">Error loading escrows: {error}</p>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="rounded-xl border border-gray-800 bg-dark-800/50 overflow-hidden">
-      <div className="p-6 pb-4">
-        <h2 className="text-lg font-semibold text-white">Escrows</h2>
-      </div>
-
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead>
-            <tr className="border-t border-gray-800 text-left text-xs uppercase text-gray-500">
-              <th className="px-6 py-3 font-medium">ID</th>
-              <th className="px-6 py-3 font-medium">Depositor</th>
-              <th className="px-6 py-3 font-medium">Beneficiary</th>
-              <th className="px-6 py-3 font-medium">Amount</th>
-              <th className="px-6 py-3 font-medium">State</th>
-              <th className="px-6 py-3 font-medium">Created</th>
-              <th className="px-6 py-3 font-medium">Deadline</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-800/50">
-            {escrows.length === 0 ? (
-              <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
-                  No escrows found
-                </td>
-              </tr>
-            ) : (
-              escrows.map((e) => (
-                <tr key={e.id} className="transition-colors hover:bg-white/[0.02]">
-                  <td className="px-6 py-3 font-mono text-gray-300">#{e.id}</td>
-                  <td className="px-6 py-3 font-mono text-gray-400">
+    <Card>
+      <CardHeader>
+        <CardTitle>Escrows</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {escrows.length === 0 ? (
+          <p className="py-10 text-center text-muted-foreground">
+            No escrows found
+          </p>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>ID</TableHead>
+                <TableHead>Depositor</TableHead>
+                <TableHead>Beneficiary</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>State</TableHead>
+                <TableHead>Created</TableHead>
+                <TableHead>Deadline</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {escrows.map((e) => (
+                <TableRow key={e.id}>
+                  <TableCell className="font-mono tabular-nums text-muted-foreground">
+                    #{e.id}
+                  </TableCell>
+                  <TableCell className="font-mono text-muted-foreground">
                     {formatAddress(e.depositor)}
-                  </td>
-                  <td className="px-6 py-3 font-mono text-gray-400">
+                  </TableCell>
+                  <TableCell className="font-mono text-muted-foreground">
                     {formatAddress(e.beneficiary)}
-                  </td>
-                  <td className="px-6 py-3 font-medium text-white">
+                  </TableCell>
+                  <TableCell className="font-mono tabular-nums text-foreground font-medium">
                     {formatUSDC(e.amount)}
-                  </td>
-                  <td className="px-6 py-3">
-                    <span
-                      className={`inline-flex rounded-full border px-2.5 py-0.5 text-xs font-medium ${STATE_COLORS[e.state] || ''}`}
-                    >
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={STATE_VARIANTS[e.state]}>
                       {STATE_NAMES[e.state] || 'Unknown'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-3 text-gray-400">
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
                     {formatDate(e.createdAt)}
-                  </td>
-                  <td className="px-6 py-3 text-gray-400">
+                  </TableCell>
+                  <TableCell className="text-muted-foreground">
                     {formatDate(e.deadline)}
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
   );
 }
