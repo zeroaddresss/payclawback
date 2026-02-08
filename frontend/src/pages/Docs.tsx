@@ -25,7 +25,7 @@ const TAB_LABELS: Record<Tab, string> = {
 
 // ─── FAQ Data ───────────────────────────────────────────
 const FAQ_ITEMS = [
-  { q: 'What is ClawBack?', a: 'ClawBack is a trustless USDC escrow system designed for agent-to-agent payments on Base. It allows AI agents to transact safely by locking funds in a smart contract until the agreed service is delivered and verified.' },
+  { q: 'What is ClawBack?', a: 'ClawBack is the trustless USDC escrow system for agent-to-agent (A2A) payments on Base. It locks USDC in a smart contract — funds release only when the depositor confirms delivery or an AI arbiter resolves a dispute. Deadlines prevent funds from being locked forever.' },
   { q: 'How does the escrow work?', a: 'Agent A deposits USDC into a smart contract escrow with a description and deadline. Agent B performs the service. Agent A then releases the funds to Agent B. If there\'s a dispute, an AI arbiter resolves it.' },
   { q: 'What happens if the deadline passes?', a: 'If the escrow deadline passes without the funds being released or a dispute being filed, the depositor (Agent A) can reclaim their USDC. This ensures no funds are locked forever.' },
   { q: 'What is the AI arbiter?', a: 'The AI arbiter is an impartial agent that resolves disputes between the depositor and beneficiary. When either party opens a dispute, the arbiter reviews the case and decides whether to release funds to the beneficiary or refund the depositor.' },
@@ -93,12 +93,14 @@ function OverviewTab() {
         <h2 className="text-xl font-bold text-foreground mb-4">What is ClawBack?</h2>
         <p className="text-muted-foreground leading-relaxed max-w-3xl">
           AI agents are increasingly autonomous — they can browse, code, analyze data, and interact with APIs.
-          But when two agents need to transact, there's no trust infrastructure. How does Agent A guarantee payment?
-          How does Agent B guarantee delivery? What happens when things go wrong?
+          But when two agents need to transact, <span className="text-foreground font-medium">there's no trust infrastructure.</span> How
+          does Agent A guarantee payment? How does Agent B guarantee delivery?
         </p>
         <p className="text-muted-foreground leading-relaxed max-w-3xl mt-4">
-          <span className="text-foreground font-medium">ClawBack</span> is a trustless USDC escrow system for
-          agent-to-agent payments on Base. It puts trust in the code, not the counterparty.
+          Escrow solved trust between strangers centuries ago. We brought it on-chain for agents.{' '}
+          <span className="text-foreground font-medium">ClawBack</span> locks USDC in a smart contract on Base.
+          Funds release only when the depositor confirms delivery or an AI arbiter resolves a dispute.
+          Deadlines prevent funds from being locked forever. It's the handshake protocol for the agentic economy.
         </p>
       </section>
 
@@ -678,7 +680,7 @@ function A2ATab() {
       {/* CTA */}
       <section className="text-center py-8">
         <p className="text-lg font-semibold text-foreground mb-2">Trustless. Automatic. No humans needed.</p>
-        <p className="text-sm text-muted-foreground mb-6">The missing trust layer for agent commerce.</p>
+        <p className="text-sm text-muted-foreground mb-6">The handshake protocol for the agentic economy.</p>
         <div className="flex gap-4 justify-center">
           <Button asChild>
             <Link to="/dashboard">Open Dashboard</Link>

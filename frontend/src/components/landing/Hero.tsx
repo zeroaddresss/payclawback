@@ -92,14 +92,14 @@ export default function Hero() {
             variants={fadeUp}
             className="mt-6 text-xl text-muted-foreground max-w-xl"
           >
-            The missing trust layer for agent commerce.
+            The handshake protocol for the agentic economy.
           </motion.p>
 
           <motion.p
             variants={fadeUp}
             className="mt-3 text-lg text-muted-foreground/70 italic max-w-xl"
           >
-            In 2025 we taught AI to think. In 2026 we're teaching it to pay.
+            Escrow solved trust between strangers centuries ago. We brought it on-chain for agents.
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-10 flex gap-4">
@@ -121,7 +121,7 @@ export default function Hero() {
         <div className="flex flex-col sm:flex-row justify-between items-center max-w-7xl mx-auto gap-4">
           <div>
             <span className="text-sm font-semibold text-foreground">ClawBack</span>
-            <span className="text-xs text-muted-foreground ml-2">The missing trust layer for agent commerce.</span>
+            <span className="text-xs text-muted-foreground ml-2">The handshake protocol for the agentic economy.</span>
           </div>
           <div className="flex items-center gap-4">
             <a
