@@ -28,7 +28,6 @@ const FAQ_ITEMS = [
   { q: 'What is the AI arbiter?', a: 'The AI arbiter is an impartial agent that resolves disputes between the depositor and beneficiary. When either party opens a dispute, the arbiter reviews the case and decides whether to release funds to the beneficiary or refund the depositor.' },
   { q: 'What blockchain is this on?', a: 'ClawBack is built on Base, a Layer 2 network built on Ethereum. It uses Circle\'s USDC stablecoin for payments.' },
   { q: 'How do AI agents interact with ClawBack?', a: 'Agents can use the REST API directly or the OpenClaw skill, which provides 7 simple bash commands for creating, managing, and resolving escrows.' },
-  { q: 'Is this production-ready?', a: 'ClawBack is deployed on Base with a comprehensive test suite of 21 unit tests and is designed for production agent-to-agent payments.' },
   { q: 'What are the escrow states?', a: 'There are 5 states: Active (funds locked), Released (paid to beneficiary), Disputed (awaiting arbiter), Refunded (returned to depositor), and Expired (deadline passed, depositor reclaimed).' },
 ];
 
@@ -267,7 +266,7 @@ function DevelopersTab() {
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4">API Reference</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Base URL: <code className="text-accent">{'${ESCROW_API_URL}'}/api</code> — Protected endpoints require <code className="text-accent">X-API-Key</code> header.
+          Base URL: <code className="text-accent">https://api.payclawback.xyz/api</code> — Write endpoints require an <code className="text-accent">X-API-Key</code> header. Contact the ClawBack team or set your own key when self-hosting.
         </p>
 
         <div className="space-y-6">
@@ -287,9 +286,9 @@ function DevelopersTab() {
   "escrowId": 1,
   "txHash": "0xabc123..."
 }`}
-            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows" \\
+            curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: \${ESCROW_API_KEY}" \\
+  -H "X-API-Key: your-api-key" \\
   -d '{
     "beneficiary": "0x742d...",
     "amount": 10,
@@ -315,7 +314,7 @@ function DevelopersTab() {
   ],
   "count": 1
 }`}
-            curl={`curl -s "\${ESCROW_API_URL}/api/escrows" | jq .`}
+            curl={`curl -s "https://api.payclawback.xyz/api/escrows" | jq .`}
           />
 
           <Endpoint
@@ -330,7 +329,7 @@ function DevelopersTab() {
   "state": 0,
   "stateName": "Active"
 }`}
-            curl={`curl -s "\${ESCROW_API_URL}/api/escrows/1" | jq .`}
+            curl={`curl -s "https://api.payclawback.xyz/api/escrows/1" | jq .`}
           />
 
           <Endpoint
@@ -342,9 +341,9 @@ function DevelopersTab() {
   "message": "Escrow released successfully",
   "txHash": "0xdef456..."
 }`}
-            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/release" \\
+            curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/release" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: \${ESCROW_API_KEY}" | jq .`}
+  -H "X-API-Key: your-api-key" | jq .`}
           />
 
           <Endpoint
@@ -356,9 +355,9 @@ function DevelopersTab() {
   "message": "Escrow disputed successfully",
   "txHash": "0xghi789..."
 }`}
-            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/dispute" \\
+            curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/dispute" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: \${ESCROW_API_KEY}" | jq .`}
+  -H "X-API-Key: your-api-key" | jq .`}
           />
 
           <Endpoint
@@ -373,9 +372,9 @@ function DevelopersTab() {
   "message": "Dispute resolved successfully",
   "txHash": "0xjkl012..."
 }`}
-            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/resolve" \\
+            curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/resolve" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: \${ESCROW_API_KEY}" \\
+  -H "X-API-Key: your-api-key" \\
   -d '{"release_to_beneficiary": true}' | jq .`}
           />
 
@@ -388,9 +387,9 @@ function DevelopersTab() {
   "message": "Expired escrow claimed",
   "txHash": "0xmno345..."
 }`}
-            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/claim-expired" \\
+            curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/claim-expired" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: \${ESCROW_API_KEY}" | jq .`}
+  -H "X-API-Key: your-api-key" | jq .`}
           />
         </div>
       </section>
@@ -399,7 +398,7 @@ function DevelopersTab() {
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4">WebSocket</h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Real-time escrow events via WebSocket at <code className="text-accent">ws://{'${ESCROW_API_URL}'}/ws</code>
+          Real-time escrow events via WebSocket at <code className="text-accent">wss://api.payclawback.xyz/ws</code>
         </p>
         <CodeBlock
           code={`{
@@ -490,7 +489,7 @@ function A2ATab() {
     <div className="space-y-12">
       {/* Hero banner */}
       <section className="text-center py-8">
-        <img src="/crabs-double-bigger-raw.svg" className="h-24 mx-auto mb-4" alt="ClawBack crabs" />
+        <img src="/crabs-double-bigger-raw.png" className="h-24 mx-auto mb-4" alt="ClawBack crabs" />
         <h2 className="text-2xl font-bold text-foreground">Where AI Agents Shake Hands</h2>
         <p className="text-muted-foreground mt-2">Trustless escrow for the agentic economy</p>
       </section>
