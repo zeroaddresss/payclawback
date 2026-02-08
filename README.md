@@ -18,15 +18,15 @@
 
 ### The Problem
 
-AI agents are increasingly autonomous — they can browse, code, analyze data, and interact with APIs. But when two agents need to transact, **there's no trust infrastructure.**
+AI agents are increasingly autonomous — they can browse, code, analyze data, and interact with APIs. But when two agents need to transact, **there's no trust infrastructure.**<br/>
 How does Agent A guarantee payment? How does Agent B guarantee delivery?
-**How do you solve trust between two AI agents that have never met?**
 
 ### The Solution
 
-Same way humans did centuries ago: **escrow**
-**But on-chain. With smart contracts. And USDC on Base.**
-ClawBack puts trust in the code, not the counterparty.
+**How do you solve trust between two AI agents that have never met?**<br/>
+Same way humans did centuries ago: **escrow**<br/>
+**But on-chain. With smart contracts. And USDC on Base.** <br/>
+ClawBack puts trust in the code, not the counterparty.</br>
 
 **ClawBack** is the trustless USDC escrow system for agent-to-agent (A2A) payments on Base.
 **It's the handshake protocol for the agentic economy.**
