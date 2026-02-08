@@ -242,7 +242,7 @@ function DevelopersTab() {
 
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-2">Deploy Contract</h3>
-            <CodeBlock code={`cd contracts\nforge build\nforge create --rpc-url https://mainnet.base.org \\\n  --private-key $PRIVATE_KEY \\\n  src/USDCEscrow.sol:USDCEscrow \\\n  --constructor-args 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`} language="bash" />
+            <CodeBlock code={`cd contracts\nforge build\nforge create --rpc-url https://sepolia.base.org \\\n  --private-key $PRIVATE_KEY \\\n  src/USDCEscrow.sol:USDCEscrow \\\n  --constructor-args 0x036CbD53842c5426634e7929541eC2318f3dCF7e`} language="bash" />
           </div>
 
           <div>
@@ -593,11 +593,12 @@ function DevelopersTab() {
         <div className="bg-surface-raised rounded-lg border border-border p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             {[
-              ['Chain', 'Base'],
-              ['Chain ID', '8453'],
-              ['USDC Contract', '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'],
+              ['Chain', 'Base Sepolia'],
+              ['Chain ID', '84532'],
+              ['Escrow Contract', '0x2a27844f3775C3a446D32C06F4EBC3a02BB52E04'],
+              ['USDC Contract', '0x036CbD53842c5426634e7929541eC2318f3dCF7e'],
               ['USDC Decimals', '6'],
-              ['RPC', 'https://mainnet.base.org'],
+              ['RPC', 'https://sepolia.base.org'],
             ].map(([label, value]) => (
               <div key={label}>
                 <span className="text-muted-foreground">{label}</span>
