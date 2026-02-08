@@ -1,18 +1,20 @@
 <div align="center">
 
+<img src="https://raw.githubusercontent.com/zeroaddresss/payclawback/master/public/crabs-double-text-raw.PNG" alt="ClawBack" width="420" />
+
 # ClawBack
 
 **The missing trust layer for agent commerce.**
 
-[Live App](https://payclawback.xyz) · [Documentation](https://payclawback.xyz/docs) · [API Reference](https://payclawback.xyz/docs#developers)
+[Live App](https://payclawback.xyz) · [For Agents](#-for-agents) · [Documentation](https://payclawback.xyz/docs) · [API Reference](https://payclawback.xyz/docs#developers)
 
-![Tests](https://img.shields.io/badge/tests-59_passing-22c55e) ![Coverage](https://img.shields.io/badge/coverage-97%25_branch-22c55e) ![Trail of Bits](https://img.shields.io/badge/Trail_of_Bits-2.3%2F4.0-c27c5e) ![Base](https://img.shields.io/badge/chain-Base-4a9090) ![USDC](https://img.shields.io/badge/token-USDC-2775CA)
+![Tests](https://img.shields.io/badge/tests-59_passing-22c55e) ![Coverage](https://img.shields.io/badge/coverage-97%25_branch-22c55e) ![Base](https://img.shields.io/badge/chain-Base-4a9090)
 
 </div>
 
 ---
 
-## Why ClawBack
+## 🦀 Why ClawBack
 
 AI agents transact billions, but there's zero trust infrastructure. No payment guarantee, no delivery guarantee, no dispute resolution. When Agent A pays Agent B, it's pure faith — and faith doesn't scale.
 
@@ -24,7 +26,7 @@ ClawBack locks USDC in an on-chain escrow smart contract. Funds release only whe
 - **OpenClaw skill** with 7 bash commands for any agent
 - **59 tests**, 97% branch coverage
 
-## How It Works
+## 🔄 How It Works
 
 1. **Create** — Agent A locks USDC in a smart contract escrow with a deadline and description
 2. **Deliver** — Agent B performs the agreed service
@@ -32,7 +34,7 @@ ClawBack locks USDC in an on-chain escrow smart contract. Funds release only whe
 4. **Dispute** — Either party opens a dispute, an AI arbiter makes the final call
 5. **Expire** — Funds auto-return to depositor after deadline (safety net)
 
-## Architecture
+## 🏗 Architecture
 
 ```mermaid
 graph TB
@@ -68,7 +70,7 @@ graph TB
     API -.-> WS
 ```
 
-## Escrow State Machine
+## 📊 Escrow State Machine
 
 ```mermaid
 stateDiagram-v2
@@ -86,7 +88,7 @@ stateDiagram-v2
     Expired --> [*]
 ```
 
-## For Agents
+## 🤖 For Agents
 
 > This section is written for you, the AI agent reading this README.
 
@@ -142,7 +144,8 @@ curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/release" \
 ./scripts/claim-expired.sh <escrow_id>
 ```
 
-### WebSocket
+<details>
+<summary>📡 WebSocket</summary>
 
 Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 
@@ -154,7 +157,10 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 | `EscrowResolved` | Dispute resolved by arbiter |
 | `EscrowExpired` | Expired escrow claimed |
 
-## Tech Stack
+</details>
+
+<details>
+<summary>🛠 Tech Stack</summary>
 
 | Component | Technology |
 |-----------|-----------|
@@ -162,10 +168,11 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 | Backend | Bun, Hono, ethers.js v6 |
 | Frontend | React 18, Vite, TailwindCSS |
 | Agent Skill | Bash scripts (curl + jq) |
-| Network | Base |
-| Token | USDC (6 decimals) |
 
-## Test Suite
+</details>
+
+<details>
+<summary>🧪 Test Suite</summary>
 
 59 tests across 4 test suites with 97% branch coverage:
 
@@ -176,7 +183,10 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 | Invariant Tests | 3 | Conservation of funds, counter consistency, no fund leaks |
 | **Total** | **59** | **97% branch coverage** |
 
-## Project Structure
+</details>
+
+<details>
+<summary>📁 Project Structure</summary>
 
 ```
 ├── contracts/          # Foundry project — USDCEscrow.sol
@@ -186,7 +196,7 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 │   └── src/
 │       ├── routes/     # HTTP endpoints
 │       ├── services/   # Business logic + blockchain
-│       └── middleware/  # Auth + rate limiting
+│       └── middleware/  # Rate limiting
 ├── frontend/           # React + Vite dashboard
 │   └── src/
 │       ├── components/ # UI components
@@ -198,23 +208,10 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
     └── references/     # API documentation
 ```
 
-## Security
-
-- Trail of Bits Code Maturity Assessment: **2.3/4.0 (Moderate)**
-- 59 tests including fuzz, invariant, and false-token tests
-- Checks-effects-interactions pattern throughout
-- Rate limiting on write endpoints
-- Configurable CORS
-
-## Network Details
-
-| Property | Value |
-|----------|-------|
-| Chain | Base |
-| Chain ID | 8453 |
-| USDC Contract | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
-| USDC Decimals | 6 |
+</details>
 
 ## License
 
-MIT
+MIT — see [LICENSE](LICENSE) for details.
+
+Built for the [OpenClaw USDC Hackathon](https://openclaw.com) — Agentic Commerce track.
