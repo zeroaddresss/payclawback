@@ -32,6 +32,8 @@ const FAQ_ITEMS = [
   { q: 'What blockchain is this on?', a: 'ClawBack is built on Base, a Layer 2 network built on Ethereum. It uses Circle\'s USDC stablecoin for payments.' },
   { q: 'How do AI agents interact with ClawBack?', a: 'Agents can use the REST API directly or the OpenClaw skill, which provides 7 simple bash commands for creating, managing, and resolving escrows.' },
   { q: 'What are the escrow states?', a: 'There are 5 states: Active (funds locked), Released (paid to beneficiary), Disputed (awaiting arbiter), Refunded (returned to depositor), and Expired (deadline passed, depositor reclaimed).' },
+  { q: 'What is OpenClaw?', a: 'OpenClaw is an open-source agent framework. ClawBack runs as an OpenClaw agent, meaning other AI agents can discover and interact with it through the OpenClaw network or by installing the usdc-escrow skill from ClawHub.' },
+  { q: 'Can my agent use ClawBack?', a: 'Yes! Three ways: (1) Message the ClawBack agent directly via OpenClaw, (2) Send a webhook to wake the agent, (3) Install the usdc-escrow skill from ClawHub and interact with the API directly.' },
 ];
 
 // ─── Main Component ─────────────────────────────────────
@@ -173,6 +175,7 @@ function OverviewTab() {
             { name: 'Backend', desc: 'Bun, Hono, ethers.js v6' },
             { name: 'Frontend', desc: 'React 18, Vite, TailwindCSS' },
             { name: 'Agent Skill', desc: 'Bash scripts (curl + jq)' },
+            { name: 'Agent Runtime', desc: 'OpenClaw Gateway + ClawHub' },
             { name: 'Network', desc: 'Base' },
             { name: 'Token', desc: 'USDC (6 decimals)' },
           ].map((item) => (
@@ -665,6 +668,36 @@ function A2ATab() {
         </p>
       </section>
 
+      {/* OpenClaw Agent */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-6">OpenClaw Agent</h2>
+        <p className="text-muted-foreground leading-relaxed max-w-3xl mb-6">
+          ClawBack runs as an autonomous OpenClaw agent on the gateway, always on and ready to manage escrows.
+          Other AI agents can interact with ClawBack in three ways:
+        </p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { title: 'OpenClaw Messaging', desc: 'Message the ClawBack agent directly through the OpenClaw network. The agent understands natural language requests and executes escrow operations autonomously.' },
+            { title: 'Webhook Endpoint', desc: 'Send a POST request to /hooks/wake to wake the agent and trigger actions. Useful for event-driven integrations and automated pipelines.' },
+            { title: 'ClawHub Skill', desc: 'Install the usdc-escrow skill from ClawHub and interact with the REST API directly. Any OpenClaw agent can add escrow capabilities in seconds.' },
+          ].map((item) => (
+            <div key={item.title} className="bg-surface-raised rounded-lg border border-border p-6">
+              <h3 className="text-sm font-semibold text-accent mb-2">{item.title}</h3>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+        <div className="mt-6">
+          <CodeBlock code={'clawhub install usdc-escrow'} language="bash" title="Install from ClawHub" />
+        </div>
+        <p className="text-muted-foreground text-sm mt-4">
+          Try the agent now via{' '}
+          <a href="https://ubuntu-4gb-nbg1-2.tail8913bc.ts.net" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
+            WebChat
+          </a>.
+        </p>
+      </section>
+
       {/* Use Cases */}
       <section>
         <h2 className="text-xl font-bold text-foreground mb-6">Use Cases</h2>
@@ -694,6 +727,11 @@ function A2ATab() {
             <Link to="/docs#developers" onClick={() => window.location.hash = 'developers'}>
               Read the Docs
             </Link>
+          </Button>
+          <Button asChild variant="outline">
+            <a href="https://ubuntu-4gb-nbg1-2.tail8913bc.ts.net" target="_blank" rel="noopener noreferrer">
+              Chat with Agent
+            </a>
           </Button>
         </div>
       </section>

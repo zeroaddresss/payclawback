@@ -1,12 +1,12 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/zeroaddresss/payclawback/master/frontend/public/logo-no-bg.png" alt="ClawBack" width="420" />
+<img src="https://raw.githubusercontent.com/zeroaddresss/clawback/master/frontend/public/logo-no-bg.png" alt="ClawBack" width="420" />
 
 # ClawBack
 
 **The trustless escrow system for A2A (Agent-to-Agent) payments on-chain.**
 
-[Live App](https://payclawback.xyz) · [For Agents](#-for-agents) · [Documentation](https://payclawback.xyz/docs) · [API Reference](https://payclawback.xyz/docs#developers)
+[Live App](https://payclawback.xyz) · [Agent WebChat](https://ubuntu-4gb-nbg1-2.tail8913bc.ts.net) · [For Agents](#-for-agents) · [Documentation](https://payclawback.xyz/docs) · [API Reference](https://payclawback.xyz/docs#developers)
 
 ![Tests](https://img.shields.io/badge/tests-59_passing-22c55e) ![Coverage](https://img.shields.io/badge/coverage-97%25_branch-22c55e) ![Base](https://img.shields.io/badge/chain-Base-4a9090) [![Verified](https://img.shields.io/badge/contract-verified-22c55e)](https://sepolia.basescan.org/address/0x2a27844f3775c3a446d32c06f4ebc3a02bb52e04)
 
@@ -43,13 +43,17 @@ ClawBack puts trust in the code, not the counterparty.</br>
 
 ```mermaid
 graph TB
-    subgraph agents["AI Agents"]
-        A["Agent A<br/>(Depositor)"]
-        B["Agent B<br/>(Beneficiary)"]
+    subgraph external["External Agents"]
+        EA["Other AI Agents"]
     end
 
-    subgraph skill["OpenClaw Skill"]
-        S["7 Bash Scripts<br/>create · release · dispute<br/>resolve · claim · list · get"]
+    subgraph gateway["OpenClaw Gateway"]
+        GW["Gateway (port 18789)<br/>WebChat · Messaging · Webhook"]
+    end
+
+    subgraph agent["ClawBack Agent"]
+        SOUL["SOUL.md + IDENTITY.md"]
+        SKILL["usdc-escrow Skill<br/>7 Bash Scripts"]
     end
 
     subgraph backend["Backend"]
@@ -66,9 +70,10 @@ graph TB
         DASH["React Dashboard<br/>Vite + TailwindCSS"]
     end
 
-    A --> S
-    B --> S
-    S --> API
+    EA -->|OpenClaw messaging<br/>or /hooks/wake| GW
+    GW --> SOUL
+    SOUL --> SKILL
+    SKILL --> API
     API --> SC
     SC --> USDC
     DASH --> API
@@ -137,6 +142,12 @@ curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/release" \
   -H "Content-Type: application/json" | jq .
 ```
 
+### Install via ClawHub
+
+```bash
+clawhub install usdc-escrow
+```
+
 ### OpenClaw Skill Commands
 
 ```bash
@@ -164,6 +175,20 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 
 </details>
 
+## 🤖 OpenClaw Agent
+
+ClawBack runs as an autonomous [OpenClaw](https://openclaw.dev) agent. The agent uses a `SOUL.md` personality file, `IDENTITY.md` for presentation, and the `usdc-escrow` skill to manage escrows end-to-end.
+
+**How other agents can interact with ClawBack:**
+
+| Method | Description |
+|--------|-------------|
+| OpenClaw Messaging | Message the ClawBack agent directly through the OpenClaw network |
+| Webhook | Send a POST to `/hooks/wake` to wake the agent |
+| ClawHub Skill | Install [`usdc-escrow`](https://clawhub.ai/skills/usdc-escrow) from ClawHub and call the API directly |
+
+The agent is always-on via the OpenClaw gateway and includes a [WebChat interface](https://ubuntu-4gb-nbg1-2.tail8913bc.ts.net) for direct interaction.
+
 <details>
 <summary>🛠 Tech Stack</summary>
 
@@ -173,6 +198,7 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 | Backend | Bun, Hono, ethers.js v6 |
 | Frontend | React 18, Vite, TailwindCSS |
 | Agent Skill | Bash scripts (curl + jq) |
+| Agent Runtime | OpenClaw Gateway + ClawHub |
 
 </details>
 
@@ -194,23 +220,27 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 <summary>📁 Project Structure</summary>
 
 ```
-├── contracts/          # Foundry project — USDCEscrow.sol
-│   ├── src/            # Smart contract source
-│   └── test/           # Contract tests (59 tests)
-├── backend/            # Bun + Hono REST API
+├── contracts/                  # Foundry project — USDCEscrow.sol
+│   ├── src/                    # Smart contract source
+│   └── test/                   # Contract tests (59 tests)
+├── backend/                    # Bun + Hono REST API
 │   └── src/
-│       ├── routes/     # HTTP endpoints
-│       ├── services/   # Business logic + blockchain
-│       └── middleware/  # Rate limiting
-├── frontend/           # React + Vite dashboard
+│       ├── routes/             # HTTP endpoints
+│       ├── services/           # Business logic + blockchain
+│       └── middleware/         # Rate limiting
+├── frontend/                   # React + Vite dashboard
 │   └── src/
-│       ├── components/ # UI components
-│       ├── pages/      # Landing, Dashboard, Docs
-│       ├── hooks/      # React hooks (escrows, WebSocket)
-│       └── lib/        # API client + utilities
-└── skill/              # OpenClaw agent skill
-    ├── scripts/        # 7 bash wrapper scripts
-    └── references/     # API documentation
+│       ├── components/         # UI components
+│       ├── pages/              # Landing, Dashboard, Docs
+│       ├── hooks/              # React hooks (escrows, WebSocket)
+│       └── lib/                # API client + utilities
+├── skill/                      # OpenClaw agent skill
+│   ├── scripts/                # 7 bash wrapper scripts
+│   └── references/             # API documentation
+└── ~/.openclaw/workspace/      # OpenClaw agent config
+    ├── SOUL.md                 # Agent personality
+    ├── IDENTITY.md             # Agent presentation
+    └── skills/usdc-escrow/     # Installed skill
 ```
 
 </details>

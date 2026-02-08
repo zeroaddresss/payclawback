@@ -2,7 +2,7 @@
 # Open a dispute on an escrow
 set -e
 
-API_URL="${ESCROW_API_URL:?Set ESCROW_API_URL}"
+API_URL="${ESCROW_API_URL:-https://api.payclawback.xyz}"
 
 if [ $# -lt 1 ]; then
   echo "Usage: $0 <escrow_id>"

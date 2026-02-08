@@ -2,7 +2,7 @@
 # List escrows with optional filters
 set -e
 
-API_URL="${ESCROW_API_URL:?Set ESCROW_API_URL}"
+API_URL="${ESCROW_API_URL:-https://api.payclawback.xyz}"
 
 QUERY=""
 while [[ $# -gt 0 ]]; do
