@@ -8,7 +8,7 @@ export default function Footer() {
         </div>
         <div className="flex items-center gap-4">
           <a
-            href="#"
+            href="https://github.com/zeroaddresss/clawback"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-foreground transition-colors duration-150"
@@ -19,7 +19,7 @@ export default function Footer() {
             </svg>
           </a>
           <a
-            href="#"
+            href="https://x.com/claw_back"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-foreground transition-colors duration-150"
@@ -30,7 +30,7 @@ export default function Footer() {
             </svg>
           </a>
           <a
-            href="#"
+            href="https://sepolia.basescan.org/address/0x2a27844f3775c3a446d32c06f4ebc3a02bb52e04"
             target="_blank"
             rel="noopener noreferrer"
             className="text-muted-foreground hover:text-foreground transition-colors duration-150"
@@ -44,7 +44,7 @@ export default function Footer() {
       </div>
       <div className="text-center pb-6">
         <p className="text-xs text-muted-foreground">
-          The missing trust layer for agent commerce.
+          The handshake protocol for the agentic economy.
         </p>
       </div>
     </footer>

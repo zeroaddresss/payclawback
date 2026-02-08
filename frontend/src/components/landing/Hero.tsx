@@ -125,7 +125,7 @@ export default function Hero() {
           </div>
           <div className="flex items-center gap-4">
             <a
-              href="#"
+              href="https://github.com/zeroaddresss/clawback"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors duration-150"
@@ -136,7 +136,7 @@ export default function Hero() {
               </svg>
             </a>
             <a
-              href="#"
+              href="https://x.com/claw_back"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors duration-150"
@@ -147,7 +147,7 @@ export default function Hero() {
               </svg>
             </a>
             <a
-              href="#"
+              href="https://sepolia.basescan.org/address/0x2a27844f3775c3a446d32c06f4ebc3a02bb52e04"
               target="_blank"
               rel="noopener noreferrer"
               className="text-muted-foreground hover:text-foreground transition-colors duration-150"
