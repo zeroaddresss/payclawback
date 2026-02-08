@@ -1,3 +1,4 @@
+import { ExternalLink } from 'lucide-react';
 import { useEscrows } from '../../hooks/useEscrows';
 import { STATE_NAMES, STATE_VARIANTS } from '../../lib/constants';
 import { formatAddress, formatUSDC, formatDate } from '../../lib/formatters';
@@ -71,6 +72,7 @@ export default function EscrowTable() {
                 <TableHead>State</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead>Deadline</TableHead>
+                <TableHead>Tx</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -98,6 +100,21 @@ export default function EscrowTable() {
                   </TableCell>
                   <TableCell className="text-muted-foreground">
                     {formatDate(e.deadline)}
+                  </TableCell>
+                  <TableCell>
+                    {e.txHash ? (
+                      <a
+                        href={`https://basescan.org/tx/${e.txHash}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 text-accent hover:text-accent/80 font-mono"
+                      >
+                        {formatAddress(e.txHash)}
+                        <ExternalLink className="h-3 w-3" />
+                      </a>
+                    ) : (
+                      <span className="text-muted-foreground">&mdash;</span>
+                    )}
                   </TableCell>
                 </TableRow>
               ))}

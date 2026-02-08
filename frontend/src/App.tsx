@@ -1,5 +1,5 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 
@@ -8,10 +8,13 @@ const Dashboard = lazy(() => import('./pages/Dashboard'));
 const Docs = lazy(() => import('./pages/Docs'));
 
 export default function App() {
+  const { pathname } = useLocation();
+  const isLanding = pathname === '/';
+
   return (
     <div className="flex min-h-screen flex-col">
-      <Header />
-      <main className="flex-1 pt-16">
+      {!isLanding && <Header />}
+      <main className={isLanding ? 'flex-1' : 'flex-1 pt-16'}>
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Landing />} />
@@ -20,7 +23,7 @@ export default function App() {
           </Routes>
         </Suspense>
       </main>
-      <Footer />
+      {!isLanding && <Footer />}
     </div>
   );
 }

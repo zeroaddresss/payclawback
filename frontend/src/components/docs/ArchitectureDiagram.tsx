@@ -35,7 +35,7 @@ export default function ArchitectureDiagram() {
         {/* USDC Token box */}
         <rect x="240" y="280" width="220" height="50" rx="10" fill="#c27c5e" fillOpacity="0.12" stroke="#c27c5e" strokeWidth="2" />
         <text x="350" y="303" textAnchor="middle" fill="#c27c5e" fontSize="14" fontWeight="600">USDC Token</text>
-        <text x="350" y="320" textAnchor="middle" fill="#71717a" fontSize="11">Base Sepolia</text>
+        <text x="350" y="320" textAnchor="middle" fill="#71717a" fontSize="11">Base</text>
 
         {/* Frontend box (left side) */}
         <rect x="10" y="100" width="180" height="55" rx="10" fill="#4a9090" fillOpacity="0.12" stroke="#4a9090" strokeWidth="2" />

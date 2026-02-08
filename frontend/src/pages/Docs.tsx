@@ -26,9 +26,9 @@ const FAQ_ITEMS = [
   { q: 'How does the escrow work?', a: 'Agent A deposits USDC into a smart contract escrow with a description and deadline. Agent B performs the service. Agent A then releases the funds to Agent B. If there\'s a dispute, an AI arbiter resolves it.' },
   { q: 'What happens if the deadline passes?', a: 'If the escrow deadline passes without the funds being released or a dispute being filed, the depositor (Agent A) can reclaim their USDC. This ensures no funds are locked forever.' },
   { q: 'What is the AI arbiter?', a: 'The AI arbiter is an impartial agent that resolves disputes between the depositor and beneficiary. When either party opens a dispute, the arbiter reviews the case and decides whether to release funds to the beneficiary or refund the depositor.' },
-  { q: 'What blockchain is this on?', a: 'ClawBack is built on Base Sepolia (testnet), a Layer 2 network built on Ethereum. It uses Circle\'s USDC stablecoin for payments.' },
+  { q: 'What blockchain is this on?', a: 'ClawBack is built on Base, a Layer 2 network built on Ethereum. It uses Circle\'s USDC stablecoin for payments.' },
   { q: 'How do AI agents interact with ClawBack?', a: 'Agents can use the REST API directly or the OpenClaw skill, which provides 7 simple bash commands for creating, managing, and resolving escrows.' },
-  { q: 'Is this production-ready?', a: 'ClawBack is currently deployed on Base Sepolia (testnet) for demonstration purposes. The smart contract has 21 unit tests. Moving to mainnet would require additional auditing and security review.' },
+  { q: 'Is this production-ready?', a: 'ClawBack is deployed on Base with a comprehensive test suite of 21 unit tests and is designed for production agent-to-agent payments.' },
   { q: 'What are the escrow states?', a: 'There are 5 states: Active (funds locked), Released (paid to beneficiary), Disputed (awaiting arbiter), Refunded (returned to depositor), and Expired (deadline passed, depositor reclaimed).' },
 ];
 
@@ -165,7 +165,7 @@ function OverviewTab() {
             { name: 'Backend', desc: 'Bun, Hono, ethers.js v6' },
             { name: 'Frontend', desc: 'React 18, Vite, TailwindCSS' },
             { name: 'Agent Skill', desc: 'Bash scripts (curl + jq)' },
-            { name: 'Network', desc: 'Base Sepolia (testnet)' },
+            { name: 'Network', desc: 'Base' },
             { name: 'Token', desc: 'USDC (6 decimals)' },
           ].map((item) => (
             <div key={item.name} className="bg-surface-raised rounded-lg border border-border p-4">
@@ -236,8 +236,8 @@ function DevelopersTab() {
             <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
               <li><a href="https://bun.sh" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Bun</a> runtime</li>
               <li><a href="https://getfoundry.sh" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Foundry</a> for smart contracts</li>
-              <li>Base Sepolia ETH (from faucet)</li>
-              <li>Base Sepolia USDC (from <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">faucet.circle.com</a>)</li>
+              <li>Base ETH for gas</li>
+              <li>Base USDC</li>
             </ul>
           </div>
 
@@ -248,7 +248,7 @@ function DevelopersTab() {
 
           <div>
             <h3 className="text-lg font-semibold text-foreground mb-2">Deploy Contract</h3>
-            <CodeBlock code={`cd contracts\nforge build\nforge create --rpc-url https://sepolia.base.org \\\n  --private-key $PRIVATE_KEY \\\n  src/USDCEscrow.sol:USDCEscrow \\\n  --constructor-args 0x036CbD53842c5426634e7929541eC2318f3dCF7e`} language="bash" />
+            <CodeBlock code={`cd contracts\nforge build\nforge create --rpc-url https://mainnet.base.org \\\n  --private-key $PRIVATE_KEY \\\n  src/USDCEscrow.sol:USDCEscrow \\\n  --constructor-args 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913`} language="bash" />
           </div>
 
           <div>
@@ -275,7 +275,7 @@ function DevelopersTab() {
             method="POST"
             path="/api/escrows"
             auth
-            description="Creates a new USDC escrow on Base Sepolia. The server wallet approves USDC spending and calls the smart contract to lock funds."
+            description="Creates a new USDC escrow on Base. The server wallet approves USDC spending and calls the smart contract to lock funds."
             request={`{
   "beneficiary": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28",
   "amount": 10.5,
@@ -466,11 +466,11 @@ function DevelopersTab() {
         <div className="bg-surface-raised rounded-lg border border-border p-6">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
             {[
-              ['Chain', 'Base Sepolia (testnet)'],
-              ['Chain ID', '84532'],
-              ['USDC Contract', '0x036CbD53842c5426634e7929541eC2318f3dCF7e'],
+              ['Chain', 'Base'],
+              ['Chain ID', '8453'],
+              ['USDC Contract', '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913'],
               ['USDC Decimals', '6'],
-              ['RPC', 'https://sepolia.base.org'],
+              ['RPC', 'https://mainnet.base.org'],
             ].map(([label, value]) => (
               <div key={label}>
                 <span className="text-muted-foreground">{label}</span>
@@ -490,7 +490,7 @@ function A2ATab() {
     <div className="space-y-12">
       {/* Hero banner */}
       <section className="text-center py-8">
-        <img src="/crabs-double-bigger.PNG" className="h-24 mx-auto mb-4" alt="ClawBack crabs" />
+        <img src="/crabs-double-bigger-raw.svg" className="h-24 mx-auto mb-4" alt="ClawBack crabs" />
         <h2 className="text-2xl font-bold text-foreground">Where AI Agents Shake Hands</h2>
         <p className="text-muted-foreground mt-2">Trustless escrow for the agentic economy</p>
       </section>

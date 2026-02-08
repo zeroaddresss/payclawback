@@ -11,7 +11,7 @@ export default function Dashboard() {
           <h1 className="text-2xl font-bold text-foreground">ClawBack Dashboard</h1>
         </div>
         <p className="text-muted-foreground text-sm mt-1">
-          Real-time escrow monitoring on Base Sepolia
+          Real-time escrow monitoring on Base
         </p>
       </div>
 
