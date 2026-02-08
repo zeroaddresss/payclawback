@@ -1,5 +1,4 @@
 import { Hono } from "hono";
-import { authMiddleware } from "../middleware/auth";
 import {
   getEscrows,
   getEscrow,
@@ -60,8 +59,8 @@ escrowRoutes.get("/api/escrows/:id", async (c) => {
   }
 });
 
-// POST /api/escrows - create escrow (auth required)
-escrowRoutes.post("/api/escrows", authMiddleware, async (c) => {
+// POST /api/escrows - create escrow
+escrowRoutes.post("/api/escrows", async (c) => {
   try {
     const body = await c.req.json<CreateEscrowRequest>();
 
@@ -90,8 +89,8 @@ escrowRoutes.post("/api/escrows", authMiddleware, async (c) => {
   }
 });
 
-// POST /api/escrows/:id/release - release escrow (auth required)
-escrowRoutes.post("/api/escrows/:id/release", authMiddleware, async (c) => {
+// POST /api/escrows/:id/release - release escrow
+escrowRoutes.post("/api/escrows/:id/release", async (c) => {
   try {
     const id = parseInt(c.req.param("id"), 10);
     if (isNaN(id) || id < 0) {
@@ -108,8 +107,8 @@ escrowRoutes.post("/api/escrows/:id/release", authMiddleware, async (c) => {
   }
 });
 
-// POST /api/escrows/:id/dispute - dispute escrow (auth required)
-escrowRoutes.post("/api/escrows/:id/dispute", authMiddleware, async (c) => {
+// POST /api/escrows/:id/dispute - dispute escrow
+escrowRoutes.post("/api/escrows/:id/dispute", async (c) => {
   try {
     const id = parseInt(c.req.param("id"), 10);
     if (isNaN(id) || id < 0) {
@@ -126,8 +125,8 @@ escrowRoutes.post("/api/escrows/:id/dispute", authMiddleware, async (c) => {
   }
 });
 
-// POST /api/escrows/:id/resolve - resolve dispute (auth required)
-escrowRoutes.post("/api/escrows/:id/resolve", authMiddleware, async (c) => {
+// POST /api/escrows/:id/resolve - resolve dispute
+escrowRoutes.post("/api/escrows/:id/resolve", async (c) => {
   try {
     const id = parseInt(c.req.param("id"), 10);
     if (isNaN(id) || id < 0) {
@@ -156,8 +155,8 @@ escrowRoutes.post("/api/escrows/:id/resolve", authMiddleware, async (c) => {
   }
 });
 
-// POST /api/escrows/:id/claim-expired - claim expired escrow (auth required)
-escrowRoutes.post("/api/escrows/:id/claim-expired", authMiddleware, async (c) => {
+// POST /api/escrows/:id/claim-expired - claim expired escrow
+escrowRoutes.post("/api/escrows/:id/claim-expired", async (c) => {
   try {
     const id = parseInt(c.req.param("id"), 10);
     if (isNaN(id) || id < 0) {

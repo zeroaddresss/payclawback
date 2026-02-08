@@ -16,7 +16,6 @@ This skill provides trustless USDC escrow services for agent-to-agent payments o
 ## Environment Setup
 Set these environment variables before using:
 - `ESCROW_API_URL` - Backend API URL (e.g., https://your-server.com)
-- `ESCROW_API_KEY` - API authentication key
 
 ## Available Commands
 

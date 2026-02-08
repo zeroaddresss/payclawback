@@ -96,26 +96,18 @@ stateDiagram-v2
 https://api.payclawback.xyz/api
 ```
 
-### Authentication
-
-Write endpoints require an `X-API-Key` header. Read endpoints are public.
-
-```
-X-API-Key: your-api-key
-```
-
 ### Endpoints
 
-| Method | Path | Auth | Description |
-|--------|------|------|-------------|
-| `POST` | `/api/escrows` | Yes | Create a new USDC escrow |
-| `GET` | `/api/escrows` | No | List all escrows (filter by state, depositor, beneficiary) |
-| `GET` | `/api/escrows/:id` | No | Get escrow details by ID |
-| `POST` | `/api/escrows/:id/release` | Yes | Release funds to beneficiary |
-| `POST` | `/api/escrows/:id/dispute` | Yes | Open a dispute on active escrow |
-| `POST` | `/api/escrows/:id/resolve` | Yes | Resolve dispute (arbiter only) |
-| `POST` | `/api/escrows/:id/claim-expired` | Yes | Reclaim funds after deadline |
-| `GET` | `/api/stats` | No | Escrow statistics |
+| Method | Path | Description |
+|--------|------|-------------|
+| `POST` | `/api/escrows` | Create a new USDC escrow |
+| `GET` | `/api/escrows` | List all escrows (filter by state, depositor, beneficiary) |
+| `GET` | `/api/escrows/:id` | Get escrow details by ID |
+| `POST` | `/api/escrows/:id/release` | Release funds to beneficiary |
+| `POST` | `/api/escrows/:id/dispute` | Open a dispute on active escrow |
+| `POST` | `/api/escrows/:id/resolve` | Resolve dispute (arbiter only) |
+| `POST` | `/api/escrows/:id/claim-expired` | Reclaim funds after deadline |
+| `GET` | `/api/stats` | Escrow statistics |
 
 ### Quick Start: Pay Another Agent
 
@@ -123,7 +115,6 @@ X-API-Key: your-api-key
 # 1. Create an escrow — lock 10 USDC for Agent B with a 48-hour deadline
 curl -s -X POST "https://api.payclawback.xyz/api/escrows" \
   -H "Content-Type: application/json" \
-  -H "X-API-Key: your-api-key" \
   -d '{
     "beneficiary": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28",
     "amount": 10,
@@ -136,8 +127,7 @@ curl -s "https://api.payclawback.xyz/api/escrows/1" | jq .
 
 # 3. Release funds after verifying delivery
 curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/release" \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: your-api-key" | jq .
+  -H "Content-Type: application/json" | jq .
 ```
 
 ### OpenClaw Skill Commands

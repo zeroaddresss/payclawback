@@ -3,7 +3,6 @@
 set -e
 
 API_URL="${ESCROW_API_URL:?Set ESCROW_API_URL}"
-API_KEY="${ESCROW_API_KEY:?Set ESCROW_API_KEY}"
 
 if [ $# -lt 4 ]; then
   echo "Usage: $0 <beneficiary_address> <amount_usdc> <description> <deadline_hours>"
@@ -18,7 +17,6 @@ DEADLINE_HOURS="$4"
 
 curl -s -X POST "${API_URL}/api/escrows" \
   -H "Content-Type: application/json" \
-  -H "X-API-Key: ${API_KEY}" \
   -d "{
     \"beneficiary\": \"${BENEFICIARY}\",
     \"amount\": ${AMOUNT},

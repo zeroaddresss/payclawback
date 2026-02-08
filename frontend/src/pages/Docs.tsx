@@ -194,18 +194,9 @@ function MethodBadge({ method }: { method: string }) {
   );
 }
 
-function AuthBadge() {
-  return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-surface-overlay text-muted-foreground border border-border">
-      Auth
-    </span>
-  );
-}
-
-function Endpoint({ method, path, auth, description, request, response, curl }: {
+function Endpoint({ method, path, description, request, response, curl }: {
   method: string;
   path: string;
-  auth?: boolean;
   description: string;
   request?: string;
   response: string;
@@ -216,7 +207,6 @@ function Endpoint({ method, path, auth, description, request, response, curl }: 
       <div className="flex items-center gap-2 flex-wrap">
         <MethodBadge method={method} />
         <code className="text-sm font-mono text-foreground">{path}</code>
-        {auth && <AuthBadge />}
       </div>
       <p className="text-sm text-muted-foreground">{description}</p>
       {request && <CodeBlock code={request} language="json" title="Request Body" />}
@@ -269,14 +259,13 @@ function DevelopersTab() {
       <section>
         <h2 className="text-xl font-bold text-foreground mb-4">API Reference</h2>
         <p className="text-sm text-muted-foreground mb-6">
-          Base URL: <code className="text-accent">https://api.payclawback.xyz/api</code> — Write endpoints require an <code className="text-accent">X-API-Key</code> header. Contact the ClawBack team or set your own key when self-hosting.
+          Base URL: <code className="text-accent">https://api.payclawback.xyz/api</code> — All endpoints are public. Write endpoints are rate-limited to 10 requests per minute per IP.
         </p>
 
         <div className="space-y-6">
           <Endpoint
             method="POST"
             path="/api/escrows"
-            auth
             description="Creates a new USDC escrow on Base. The server wallet approves USDC spending and calls the smart contract to lock funds."
             request={`{
   "beneficiary": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28",
@@ -291,7 +280,6 @@ function DevelopersTab() {
 }`}
             curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: your-api-key" \\
   -d '{
     "beneficiary": "0x742d...",
     "amount": 10,
@@ -338,35 +326,30 @@ function DevelopersTab() {
           <Endpoint
             method="POST"
             path="/api/escrows/:id/release"
-            auth
             description="Release escrowed USDC to the beneficiary. Only the depositor can release."
             response={`{
   "message": "Escrow released successfully",
   "txHash": "0xdef456..."
 }`}
             curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/release" \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: your-api-key" | jq .`}
+  -H "Content-Type: application/json" | jq .`}
           />
 
           <Endpoint
             method="POST"
             path="/api/escrows/:id/dispute"
-            auth
             description="Open a dispute on an active escrow. Either the depositor or beneficiary can dispute."
             response={`{
   "message": "Escrow disputed successfully",
   "txHash": "0xghi789..."
 }`}
             curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/dispute" \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: your-api-key" | jq .`}
+  -H "Content-Type: application/json" | jq .`}
           />
 
           <Endpoint
             method="POST"
             path="/api/escrows/:id/resolve"
-            auth
             description="Resolve a disputed escrow. Only the arbiter (server wallet) can resolve. Funds sent to beneficiary or refunded."
             request={`{
   "release_to_beneficiary": true
@@ -377,22 +360,19 @@ function DevelopersTab() {
 }`}
             curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/resolve" \\
   -H "Content-Type: application/json" \\
-  -H "X-API-Key: your-api-key" \\
   -d '{"release_to_beneficiary": true}' | jq .`}
           />
 
           <Endpoint
             method="POST"
             path="/api/escrows/:id/claim-expired"
-            auth
             description="Reclaim funds from an expired escrow. Only the depositor can claim after the deadline has passed."
             response={`{
   "message": "Expired escrow claimed",
   "txHash": "0xmno345..."
 }`}
             curl={`curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/claim-expired" \\
-  -H "Content-Type: application/json" \\
-  -H "X-API-Key: your-api-key" | jq .`}
+  -H "Content-Type: application/json" | jq .`}
           />
         </div>
       </section>

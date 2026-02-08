@@ -9,17 +9,6 @@ All API requests should be made to:
 
 Set via the `ESCROW_API_URL` environment variable.
 
-## Authentication
-
-Protected endpoints require the `X-API-Key` header:
-```
-X-API-Key: <your-api-key>
-```
-
-Set via the `ESCROW_API_KEY` environment variable.
-
-Public endpoints (read-only) do not require authentication.
-
 ## Endpoints
 
 ### Create Escrow
@@ -28,7 +17,7 @@ Creates a new USDC escrow on Base Sepolia. The server wallet approves USDC spend
 
 - **Method:** `POST`
 - **Path:** `/api/escrows`
-- **Auth:** Required
+- **Auth:** None
 
 **Request Body:**
 ```json
@@ -60,7 +49,6 @@ Creates a new USDC escrow on Base Sepolia. The server wallet approves USDC spend
 ```bash
 curl -s -X POST "${ESCROW_API_URL}/api/escrows" \
   -H "Content-Type: application/json" \
-  -H "X-API-Key: ${ESCROW_API_KEY}" \
   -d '{
     "beneficiary": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28",
     "amount": 10,
@@ -169,7 +157,7 @@ Release escrowed USDC to the beneficiary. Only the depositor can release.
 
 - **Method:** `POST`
 - **Path:** `/api/escrows/:id/release`
-- **Auth:** Required
+- **Auth:** None
 
 **Path Parameters:**
 
@@ -188,8 +176,7 @@ Release escrowed USDC to the beneficiary. Only the depositor can release.
 **curl Example:**
 ```bash
 curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/release" \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: ${ESCROW_API_KEY}" | jq .
+  -H "Content-Type: application/json" | jq .
 ```
 
 ---
@@ -200,7 +187,7 @@ Open a dispute on an active escrow. Either the depositor or beneficiary can disp
 
 - **Method:** `POST`
 - **Path:** `/api/escrows/:id/dispute`
-- **Auth:** Required
+- **Auth:** None
 
 **Path Parameters:**
 
@@ -219,8 +206,7 @@ Open a dispute on an active escrow. Either the depositor or beneficiary can disp
 **curl Example:**
 ```bash
 curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/dispute" \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: ${ESCROW_API_KEY}" | jq .
+  -H "Content-Type: application/json" | jq .
 ```
 
 ---
@@ -231,7 +217,7 @@ Resolve a disputed escrow. Only the arbiter (server wallet) can resolve. Funds a
 
 - **Method:** `POST`
 - **Path:** `/api/escrows/:id/resolve`
-- **Auth:** Required
+- **Auth:** None
 
 **Request Body:**
 ```json
@@ -256,7 +242,6 @@ Resolve a disputed escrow. Only the arbiter (server wallet) can resolve. Funds a
 ```bash
 curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/resolve" \
   -H "Content-Type: application/json" \
-  -H "X-API-Key: ${ESCROW_API_KEY}" \
   -d '{"release_to_beneficiary": true}' | jq .
 ```
 
@@ -268,7 +253,7 @@ Reclaim funds from an expired escrow. Only the depositor can claim after the dea
 
 - **Method:** `POST`
 - **Path:** `/api/escrows/:id/claim-expired`
-- **Auth:** Required
+- **Auth:** None
 
 **Path Parameters:**
 
@@ -287,8 +272,7 @@ Reclaim funds from an expired escrow. Only the depositor can claim after the dea
 **curl Example:**
 ```bash
 curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/claim-expired" \
-  -H "Content-Type: application/json" \
-  -H "X-API-Key: ${ESCROW_API_KEY}" | jq .
+  -H "Content-Type: application/json" | jq .
 ```
 
 ---
@@ -381,7 +365,6 @@ All errors follow a consistent format:
 | Code | Meaning |
 |------|---------|
 | 400 | Bad request - missing or invalid parameters |
-| 401 | Unauthorized - missing or invalid API key |
 | 500 | Internal server error - blockchain transaction failed |
 
 ---
