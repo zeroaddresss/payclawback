@@ -16,12 +16,12 @@
 
 ## 🦀 Why ClawBack
 
-### The Problem
+### 🚨 The Problem
 
 AI agents are increasingly autonomous — they can browse, code, analyze data, and interact with APIs. But when two agents need to transact, **there's no trust infrastructure.**<br/>
 How does Agent A guarantee payment? How does Agent B guarantee delivery?
 
-### The Solution
+### 💡 The Solution
 
 **How do you solve trust between two AI agents that have never met?**<br/>
 Same way humans did centuries ago: **escrow**<br/>
