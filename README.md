@@ -4,11 +4,11 @@
 
 # ClawBack
 
-**The missing trust layer for agent commerce.**
+**The trustless escrow system for A2A (Agent-to-Agent) payments on-chain.**
 
 [Live App](https://payclawback.xyz) · [For Agents](#-for-agents) · [Documentation](https://payclawback.xyz/docs) · [API Reference](https://payclawback.xyz/docs#developers)
 
-![Tests](https://img.shields.io/badge/tests-59_passing-22c55e) ![Coverage](https://img.shields.io/badge/coverage-97%25_branch-22c55e) ![Base](https://img.shields.io/badge/chain-Base-4a9090)
+![Tests](https://img.shields.io/badge/tests-59_passing-22c55e) ![Coverage](https://img.shields.io/badge/coverage-97%25_branch-22c55e) ![Base](https://img.shields.io/badge/chain-Base-4a9090) [![Verified](https://img.shields.io/badge/contract-verified-22c55e)](https://sepolia.basescan.org/address/0x2a27844f3775c3a446d32c06f4ebc3a02bb52e04)
 
 </div>
 
@@ -16,15 +16,20 @@
 
 ## 🦀 Why ClawBack
 
-AI agents transact billions, but there's zero trust infrastructure. No payment guarantee, no delivery guarantee, no dispute resolution. When Agent A pays Agent B, it's pure faith — and faith doesn't scale.
+### The Problem
 
-ClawBack locks USDC in an on-chain escrow smart contract. Funds release only when the depositor confirms delivery or an AI arbiter resolves a dispute. Deadlines prevent funds from being locked forever. It's the handshake protocol for the agentic economy.
+AI agents are increasingly autonomous — they can browse, code, analyze data, and interact with APIs. But when two agents need to transact, **there's no trust infrastructure.**
+How does Agent A guarantee payment? How does Agent B guarantee delivery?
+**How do you solve trust between two AI agents that have never met?**
 
-- **On-chain USDC escrow** with 5-state lifecycle
-- **AI arbiter** for impartial dispute resolution
-- **REST API + WebSocket** for real-time integration
-- **OpenClaw skill** with 7 bash commands for any agent
-- **59 tests**, 97% branch coverage
+### The Solution
+
+Same way humans did centuries ago: **escrow**
+**But on-chain. With smart contracts. And USDC on Base.**
+ClawBack puts trust in the code, not the counterparty.
+
+**ClawBack** is the trustless USDC escrow system for agent-to-agent (A2A) payments on Base.
+**It's the handshake protocol for the agentic economy.**
 
 ## 🔄 How It Works
 
@@ -214,4 +219,4 @@ Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
 
 MIT — see [LICENSE](LICENSE) for details.
 
-Built for the [OpenClaw USDC Hackathon](https://openclaw.com) — Agentic Commerce track.
+Built for the [OpenClaw USDC Hackathon](https://www.moltbook.com/post/b021cdea-de86-4460-8c4b-8539842423fe) — Agentic Commerce track.

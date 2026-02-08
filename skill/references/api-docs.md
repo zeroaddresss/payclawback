@@ -2,18 +2,15 @@
 
 ## Base URL
 
-All API requests should be made to:
 ```
-{ESCROW_API_URL}/api
+https://api.payclawback.xyz/api
 ```
-
-Set via the `ESCROW_API_URL` environment variable.
 
 ## Endpoints
 
 ### Create Escrow
 
-Creates a new USDC escrow on Base Sepolia. The server wallet approves USDC spending and calls the smart contract to lock funds.
+Creates a new USDC escrow on Base. The server wallet approves USDC spending and calls the smart contract to lock funds.
 
 - **Method:** `POST`
 - **Path:** `/api/escrows`
@@ -47,7 +44,7 @@ Creates a new USDC escrow on Base Sepolia. The server wallet approves USDC spend
 
 **curl Example:**
 ```bash
-curl -s -X POST "${ESCROW_API_URL}/api/escrows" \
+curl -s -X POST "https://api.payclawback.xyz/api/escrows" \
   -H "Content-Type: application/json" \
   -d '{
     "beneficiary": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28",
@@ -101,13 +98,13 @@ Retrieve all escrows with optional filtering.
 **curl Example:**
 ```bash
 # List all escrows
-curl -s "${ESCROW_API_URL}/api/escrows" | jq .
+curl -s "https://api.payclawback.xyz/api/escrows" | jq .
 
 # Filter by state (active only)
-curl -s "${ESCROW_API_URL}/api/escrows?state=0" | jq .
+curl -s "https://api.payclawback.xyz/api/escrows?state=0" | jq .
 
 # Filter by depositor
-curl -s "${ESCROW_API_URL}/api/escrows?depositor=0x742d..." | jq .
+curl -s "https://api.payclawback.xyz/api/escrows?depositor=0x742d..." | jq .
 ```
 
 ---
@@ -146,7 +143,7 @@ Retrieve details of a specific escrow by ID.
 
 **curl Example:**
 ```bash
-curl -s "${ESCROW_API_URL}/api/escrows/1" | jq .
+curl -s "https://api.payclawback.xyz/api/escrows/1" | jq .
 ```
 
 ---
@@ -175,7 +172,7 @@ Release escrowed USDC to the beneficiary. Only the depositor can release.
 
 **curl Example:**
 ```bash
-curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/release" \
+curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/release" \
   -H "Content-Type: application/json" | jq .
 ```
 
@@ -205,7 +202,7 @@ Open a dispute on an active escrow. Either the depositor or beneficiary can disp
 
 **curl Example:**
 ```bash
-curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/dispute" \
+curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/dispute" \
   -H "Content-Type: application/json" | jq .
 ```
 
@@ -240,7 +237,7 @@ Resolve a disputed escrow. Only the arbiter (server wallet) can resolve. Funds a
 
 **curl Example:**
 ```bash
-curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/resolve" \
+curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/resolve" \
   -H "Content-Type: application/json" \
   -d '{"release_to_beneficiary": true}' | jq .
 ```
@@ -271,7 +268,7 @@ Reclaim funds from an expired escrow. Only the depositor can claim after the dea
 
 **curl Example:**
 ```bash
-curl -s -X POST "${ESCROW_API_URL}/api/escrows/1/claim-expired" \
+curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/claim-expired" \
   -H "Content-Type: application/json" | jq .
 ```
 
@@ -300,7 +297,7 @@ Retrieve aggregate escrow statistics.
 
 **curl Example:**
 ```bash
-curl -s "${ESCROW_API_URL}/api/stats" | jq .
+curl -s "https://api.payclawback.xyz/api/stats" | jq .
 ```
 
 ---
@@ -371,8 +368,9 @@ All errors follow a consistent format:
 
 ## Network Details
 
-- **Chain:** Base Sepolia (testnet)
+- **Chain:** Base Sepolia
 - **Chain ID:** 84532
-- **USDC Contract:** `0x036CbD53842c5426634e7929541eC2318f3dCF7e`
+- **Escrow Contract:** [`0x2a27844f3775C3a446D32C06F4EBC3a02BB52E04`](https://sepolia.basescan.org/address/0x2a27844f3775c3a446d32c06f4ebc3a02bb52e04) (verified)
+- **USDC Contract:** [`0x036CbD53842c5426634e7929541eC2318f3dCF7e`](https://sepolia.basescan.org/address/0x036CbD53842c5426634e7929541eC2318f3dCF7e)
 - **USDC Decimals:** 6
 - **RPC:** `https://sepolia.base.org`
