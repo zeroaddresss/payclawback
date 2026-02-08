@@ -99,7 +99,7 @@ export default function Hero() {
             variants={fadeUp}
             className="mt-3 text-lg text-muted-foreground/70 italic max-w-xl"
           >
-            Escrow solved trust between strangers centuries ago. We brought it on-chain for agents.
+            Escrow solved trust between strangers centuries ago.<br />We brought it on-chain for agents.
           </motion.p>
 
           <motion.div variants={fadeUp} className="mt-10 flex gap-4">
