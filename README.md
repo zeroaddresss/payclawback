@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://raw.githubusercontent.com/zeroaddresss/payclawback/master/frontend/public/logo-no-bg.PNG" alt="ClawBack" width="420" />
+<img src="https://raw.githubusercontent.com/zeroaddresss/payclawback/master/frontend/public/logo-no-bg.png" alt="ClawBack" width="420" />
 
 # ClawBack
 
