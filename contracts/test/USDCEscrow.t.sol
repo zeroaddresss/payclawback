@@ -345,4 +345,383 @@ contract USDCEscrowTest is Test {
         vm.expectRevert("Escrow is not active");
         escrow.claimExpired(0);
     }
+
+    // ========== edge case tests ==========
+
+    function test_createEscrow_depositorIsBeneficiary() public {
+        // Contract does not prevent depositor == beneficiary
+        vm.prank(depositor);
+        uint256 id = escrow.createEscrow(depositor, AMOUNT, "Self escrow", DEADLINE);
+
+        USDCEscrow.Escrow memory e = escrow.getEscrow(id);
+        assertEq(e.depositor, depositor);
+        assertEq(e.beneficiary, depositor);
+    }
+
+    function test_release_byBeneficiary_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(beneficiary);
+        vm.expectRevert("Only depositor or arbiter can release");
+        escrow.release(0);
+    }
+
+    function test_claimExpired_exactDeadline() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        // Warp to exactly the deadline (not past it)
+        vm.warp(DEADLINE);
+
+        // Should revert because require is block.timestamp > deadline (strict >)
+        vm.expectRevert("Escrow has not expired");
+        escrow.claimExpired(0);
+    }
+
+    function test_getEscrow_nonexistent() public view {
+        // Reading a non-existent escrow returns zeroed struct
+        USDCEscrow.Escrow memory e = escrow.getEscrow(999);
+        assertEq(e.id, 0);
+        assertEq(e.depositor, address(0));
+        assertEq(e.beneficiary, address(0));
+        assertEq(e.arbiter, address(0));
+        assertEq(e.amount, 0);
+        assertEq(e.deadline, 0);
+        assertEq(uint256(e.state), uint256(USDCEscrow.EscrowState.Active));
+    }
+
+    function test_createEscrow_veryLargeAmount() public {
+        uint256 largeAmount = 1e12 * 1e6; // 1 trillion USDC (1e18)
+        usdc.mint(depositor, largeAmount);
+
+        vm.prank(depositor);
+        usdc.approve(address(escrow), largeAmount);
+
+        vm.prank(depositor);
+        uint256 id = escrow.createEscrow(beneficiary, largeAmount, "Whale escrow", DEADLINE);
+
+        USDCEscrow.Escrow memory e = escrow.getEscrow(id);
+        assertEq(e.amount, largeAmount);
+        assertEq(usdc.balanceOf(address(escrow)), largeAmount);
+    }
+
+    // ========== state transition matrix tests (audit prep) ==========
+
+    function test_dispute_afterDisputed_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        // Already disputed - should revert
+        vm.prank(depositor);
+        vm.expectRevert("Escrow is not active");
+        escrow.dispute(0);
+    }
+
+    function test_release_afterDisputed_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        // Cannot release a disputed escrow
+        vm.prank(depositor);
+        vm.expectRevert("Escrow is not active");
+        escrow.release(0);
+    }
+
+    function test_claimExpired_afterDisputed_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        vm.warp(DEADLINE + 1);
+
+        // Cannot claim expired on a disputed escrow
+        vm.expectRevert("Escrow is not active");
+        escrow.claimExpired(0);
+    }
+
+    function test_resolveDispute_afterResolved_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        escrow.resolveDispute(0, true);
+
+        // Already resolved
+        vm.expectRevert("Escrow is not disputed");
+        escrow.resolveDispute(0, false);
+    }
+
+    function test_claimExpired_afterExpired_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.warp(DEADLINE + 1);
+        escrow.claimExpired(0);
+
+        // Already expired
+        vm.expectRevert("Escrow is not active");
+        escrow.claimExpired(0);
+    }
+
+    function test_release_afterRefunded_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        escrow.resolveDispute(0, false); // refund
+
+        vm.prank(depositor);
+        vm.expectRevert("Escrow is not active");
+        escrow.release(0);
+    }
+
+    function test_claimExpired_afterRefunded_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        escrow.resolveDispute(0, false); // refund
+
+        vm.warp(DEADLINE + 1);
+
+        vm.expectRevert("Escrow is not active");
+        escrow.claimExpired(0);
+    }
+
+    // ========== access control matrix tests (audit prep) ==========
+
+    function test_resolveDispute_byDepositor_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        vm.prank(depositor);
+        vm.expectRevert("Only arbiter can resolve disputes");
+        escrow.resolveDispute(0, true);
+    }
+
+    function test_resolveDispute_byBeneficiary_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(beneficiary);
+        escrow.dispute(0);
+
+        vm.prank(beneficiary);
+        vm.expectRevert("Only arbiter can resolve disputes");
+        escrow.resolveDispute(0, true);
+    }
+
+    function test_dispute_byArbiter_fails() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        // arbiter (owner) should NOT be able to dispute
+        vm.expectRevert("Only depositor or beneficiary can dispute");
+        escrow.dispute(0);
+    }
+
+    function test_claimExpired_anyoneCanCall() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.warp(DEADLINE + 1);
+
+        uint256 depositorBefore = usdc.balanceOf(depositor);
+
+        // stranger can call claimExpired - funds still go to depositor
+        vm.prank(stranger);
+        escrow.claimExpired(0);
+
+        assertEq(usdc.balanceOf(depositor), depositorBefore + AMOUNT);
+    }
+
+    // ========== deadline boundary tests (audit prep) ==========
+
+    function test_createEscrow_deadlineExactlyBlockTimestamp_fails() public {
+        vm.prank(depositor);
+        vm.expectRevert("Deadline must be in the future");
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", block.timestamp);
+    }
+
+    function test_createEscrow_deadlineBlockTimestampPlusOne_succeeds() public {
+        vm.prank(depositor);
+        uint256 id = escrow.createEscrow(beneficiary, AMOUNT, "Test", block.timestamp + 1);
+        assertEq(id, 0);
+    }
+
+    // ========== conservation of value test (PBT property) ==========
+
+    function test_fullLifecycle_conservationOfValue_release() public {
+        uint256 totalBefore = usdc.balanceOf(depositor) + usdc.balanceOf(beneficiary) + usdc.balanceOf(address(escrow));
+
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.release(0);
+
+        uint256 totalAfter = usdc.balanceOf(depositor) + usdc.balanceOf(beneficiary) + usdc.balanceOf(address(escrow));
+        assertEq(totalBefore, totalAfter);
+    }
+
+    function test_fullLifecycle_conservationOfValue_refund() public {
+        uint256 totalBefore = usdc.balanceOf(depositor) + usdc.balanceOf(beneficiary) + usdc.balanceOf(address(escrow));
+
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        escrow.resolveDispute(0, false);
+
+        uint256 totalAfter = usdc.balanceOf(depositor) + usdc.balanceOf(beneficiary) + usdc.balanceOf(address(escrow));
+        assertEq(totalBefore, totalAfter);
+    }
+
+    function test_fullLifecycle_conservationOfValue_expire() public {
+        uint256 totalBefore = usdc.balanceOf(depositor) + usdc.balanceOf(beneficiary) + usdc.balanceOf(address(escrow));
+
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.warp(DEADLINE + 1);
+        escrow.claimExpired(0);
+
+        uint256 totalAfter = usdc.balanceOf(depositor) + usdc.balanceOf(beneficiary) + usdc.balanceOf(address(escrow));
+        assertEq(totalBefore, totalAfter);
+    }
+
+    // ========== owner/arbiter immutability test ==========
+
+    function test_arbiterIsOwner() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        USDCEscrow.Escrow memory e = escrow.getEscrow(0);
+        assertEq(e.arbiter, escrow.owner());
+    }
+}
+
+// ========== False-returning ERC20 tests (audit prep: malicious token) ==========
+
+contract FalseReturningERC20 is IERC20 {
+    // Returns false instead of reverting - tests the require() guards in USDCEscrow
+    mapping(address => uint256) private _balances;
+    mapping(address => mapping(address => uint256)) private _allowances;
+    bool public shouldFail;
+
+    function setShouldFail(bool _fail) external { shouldFail = _fail; }
+    function mint(address to, uint256 amount) external { _balances[to] += amount; }
+
+    function totalSupply() external pure override returns (uint256) { return 0; }
+    function balanceOf(address account) external view override returns (uint256) { return _balances[account]; }
+
+    function transfer(address to, uint256 amount) external override returns (bool) {
+        if (shouldFail) return false;
+        _balances[msg.sender] -= amount;
+        _balances[to] += amount;
+        return true;
+    }
+
+    function allowance(address _owner, address spender) external view override returns (uint256) {
+        return _allowances[_owner][spender];
+    }
+
+    function approve(address spender, uint256 amount) external override returns (bool) {
+        _allowances[msg.sender][spender] = amount;
+        return true;
+    }
+
+    function transferFrom(address from, address to, uint256 amount) external override returns (bool) {
+        if (shouldFail) return false;
+        _balances[from] -= amount;
+        _balances[to] += amount;
+        _allowances[from][msg.sender] -= amount;
+        return true;
+    }
+}
+
+contract USDCEscrowFalseTokenTest is Test {
+    USDCEscrow public escrow;
+    FalseReturningERC20 public token;
+
+    address public depositor = address(0x1);
+    address public beneficiary = address(0x2);
+    uint256 public constant AMOUNT = 1000 * 1e6;
+    uint256 public constant DEADLINE = 1000000;
+
+    function setUp() public {
+        token = new FalseReturningERC20();
+        escrow = new USDCEscrow(address(token));
+        vm.warp(1000);
+
+        token.mint(depositor, AMOUNT * 10);
+        vm.prank(depositor);
+        token.approve(address(escrow), type(uint256).max);
+    }
+
+    function test_createEscrow_failsOnFalseTransferFrom() public {
+        token.setShouldFail(true);
+
+        vm.prank(depositor);
+        vm.expectRevert("USDC transfer failed");
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+    }
+
+    function test_release_failsOnFalseTransfer() public {
+        // Create escrow normally
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        // Now make transfer return false
+        token.setShouldFail(true);
+
+        vm.prank(depositor);
+        vm.expectRevert("USDC transfer failed");
+        escrow.release(0);
+    }
+
+    function test_resolveDispute_failsOnFalseTransfer() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.prank(depositor);
+        escrow.dispute(0);
+
+        token.setShouldFail(true);
+
+        vm.expectRevert("USDC transfer failed");
+        escrow.resolveDispute(0, true);
+    }
+
+    function test_claimExpired_failsOnFalseTransfer() public {
+        vm.prank(depositor);
+        escrow.createEscrow(beneficiary, AMOUNT, "Test", DEADLINE);
+
+        vm.warp(DEADLINE + 1);
+
+        token.setShouldFail(true);
+
+        vm.expectRevert("USDC transfer failed");
+        escrow.claimExpired(0);
+    }
 }

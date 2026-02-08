@@ -1,5 +1,6 @@
 import { Hono } from "hono";
 import { cors } from "hono/cors";
+import type { Context, Next } from "hono";
 import { config } from "./config";
 import { initBlockchain, setupEventListeners, eventBus } from "./services/blockchain";
 import healthRoutes from "./routes/health";
@@ -9,8 +10,45 @@ import type { ServerWebSocket } from "bun";
 
 const app = new Hono();
 
-// CORS middleware - allow all origins
-app.use("*", cors());
+// CORS middleware
+app.use("*", cors({ origin: config.corsOrigin }));
+
+// In-memory rate limiter for POST endpoints (10 req/min per IP)
+const RATE_LIMIT_WINDOW_MS = 60_000;
+const RATE_LIMIT_MAX = 10;
+const rateLimitMap = new Map<string, { count: number; resetAt: number }>();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [key, val] of rateLimitMap) {
+    if (val.resetAt <= now) rateLimitMap.delete(key);
+  }
+}, RATE_LIMIT_WINDOW_MS);
+
+async function rateLimitMiddleware(c: Context, next: Next) {
+  if (c.req.method !== "POST") return next();
+
+  const ip =
+    c.req.header("x-forwarded-for")?.split(",")[0]?.trim() ||
+    (c.env as any)?.ip?.address ||
+    "unknown";
+  const now = Date.now();
+  const entry = rateLimitMap.get(ip);
+
+  if (!entry || entry.resetAt <= now) {
+    rateLimitMap.set(ip, { count: 1, resetAt: now + RATE_LIMIT_WINDOW_MS });
+    return next();
+  }
+
+  if (entry.count >= RATE_LIMIT_MAX) {
+    return c.json({ error: "Too many requests. Try again later." }, 429);
+  }
+
+  entry.count++;
+  return next();
+}
+
+app.use("/api/*", rateLimitMiddleware);
 
 // Mount routes
 app.route("/", healthRoutes);

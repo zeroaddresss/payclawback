@@ -25,7 +25,7 @@ health.get("/health", async (c) => {
   return c.json({
     status: "ok",
     contract: config.contractAddress,
-    network: "base-sepolia",
+    network: config.networkName,
     wallet: walletAddress,
     ethBalance,
     usdcBalance,
