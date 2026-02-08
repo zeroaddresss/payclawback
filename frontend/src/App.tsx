@@ -5,6 +5,7 @@ import Footer from './components/layout/Footer';
 
 const Landing = lazy(() => import('./pages/Landing'));
 const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Docs = lazy(() => import('./pages/Docs'));
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Suspense fallback={null}>
           <Routes>
             <Route path="/" element={<Landing />} />
+            <Route path="/docs" element={<Docs />} />
             <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </Suspense>

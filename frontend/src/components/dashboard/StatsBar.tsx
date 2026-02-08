@@ -20,17 +20,17 @@ export default function StatsBar() {
     {
       label: 'Total Escrows',
       value: stats?.total ?? '--',
-      accent: false,
+      borderClass: 'border-l-2 border-l-accent',
     },
     {
       label: 'Total Volume',
       value: stats ? formatUSDC(stats.volume) : '--',
-      accent: true,
+      borderClass: 'border-l-2 border-l-warm',
     },
     {
       label: 'Active Escrows',
       value: stats?.active ?? '--',
-      accent: false,
+      borderClass: 'border-l-2 border-l-accent',
     },
   ];
 
@@ -42,7 +42,7 @@ export default function StatsBar() {
     >
       {cards.map((c) => (
         <motion.div key={c.label} variants={fadeUp}>
-          <Card className={c.accent ? 'border-l-2 border-l-accent' : ''}>
+          <Card className={c.borderClass}>
             <CardHeader className="pb-2">
               <CardTitle className="text-sm font-medium text-muted-foreground">
                 {c.label}

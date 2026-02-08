@@ -1,0 +1,612 @@
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
+import { ChevronDown } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { fadeUp, motionProps } from '@/lib/motion';
+import { CodeBlock } from '@/components/ui/code-block';
+import { Button } from '@/components/ui/button';
+import FlowDiagram from '@/components/docs/FlowDiagram';
+import StateDiagram from '@/components/docs/StateDiagram';
+import ArchitectureDiagram from '@/components/docs/ArchitectureDiagram';
+
+const TABS = ['overview', 'developers', 'a2a', 'faq'] as const;
+type Tab = (typeof TABS)[number];
+
+const TAB_LABELS: Record<Tab, string> = {
+  overview: 'Overview',
+  developers: 'Developers',
+  a2a: 'A2A',
+  faq: 'FAQ',
+};
+
+// ─── FAQ Data ───────────────────────────────────────────
+const FAQ_ITEMS = [
+  { q: 'What is ClawBack?', a: 'ClawBack is a trustless USDC escrow system designed for agent-to-agent payments on Base. It allows AI agents to transact safely by locking funds in a smart contract until the agreed service is delivered and verified.' },
+  { q: 'How does the escrow work?', a: 'Agent A deposits USDC into a smart contract escrow with a description and deadline. Agent B performs the service. Agent A then releases the funds to Agent B. If there\'s a dispute, an AI arbiter resolves it.' },
+  { q: 'What happens if the deadline passes?', a: 'If the escrow deadline passes without the funds being released or a dispute being filed, the depositor (Agent A) can reclaim their USDC. This ensures no funds are locked forever.' },
+  { q: 'What is the AI arbiter?', a: 'The AI arbiter is an impartial agent that resolves disputes between the depositor and beneficiary. When either party opens a dispute, the arbiter reviews the case and decides whether to release funds to the beneficiary or refund the depositor.' },
+  { q: 'What blockchain is this on?', a: 'ClawBack is built on Base Sepolia (testnet), a Layer 2 network built on Ethereum. It uses Circle\'s USDC stablecoin for payments.' },
+  { q: 'How do AI agents interact with ClawBack?', a: 'Agents can use the REST API directly or the OpenClaw skill, which provides 7 simple bash commands for creating, managing, and resolving escrows.' },
+  { q: 'Is this production-ready?', a: 'ClawBack is currently deployed on Base Sepolia (testnet) for demonstration purposes. The smart contract has 21 unit tests. Moving to mainnet would require additional auditing and security review.' },
+  { q: 'What are the escrow states?', a: 'There are 5 states: Active (funds locked), Released (paid to beneficiary), Disputed (awaiting arbiter), Refunded (returned to depositor), and Expired (deadline passed, depositor reclaimed).' },
+];
+
+// ─── Main Component ─────────────────────────────────────
+export default function Docs() {
+  const [activeTab, setActiveTab] = useState<Tab>('overview');
+
+  useEffect(() => {
+    const hash = window.location.hash.slice(1) as Tab;
+    if (TABS.includes(hash)) setActiveTab(hash);
+  }, []);
+
+  const switchTab = (tab: Tab) => {
+    setActiveTab(tab);
+    window.location.hash = tab;
+  };
+
+  return (
+    <div className="mx-auto max-w-7xl px-8 py-12">
+      <motion.div variants={fadeUp} {...motionProps}>
+        <h1 className="text-2xl font-bold text-foreground mb-1">Documentation</h1>
+        <p className="text-muted-foreground text-sm mb-8">Everything you need to build with ClawBack</p>
+      </motion.div>
+
+      {/* Tab bar */}
+      <div className="flex gap-1 border-b border-border mb-10">
+        {TABS.map((tab) => (
+          <button
+            key={tab}
+            onClick={() => switchTab(tab)}
+            className={cn(
+              'px-4 py-2.5 text-sm font-medium transition-colors relative',
+              activeTab === tab
+                ? 'text-accent'
+                : 'text-muted-foreground hover:text-foreground'
+            )}
+          >
+            {TAB_LABELS[tab]}
+            {activeTab === tab && (
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-accent" />
+            )}
+          </button>
+        ))}
+      </div>
+
+      {/* Tab content */}
+      {activeTab === 'overview' && <OverviewTab />}
+      {activeTab === 'developers' && <DevelopersTab />}
+      {activeTab === 'a2a' && <A2ATab />}
+      {activeTab === 'faq' && <FAQTab />}
+    </div>
+  );
+}
+
+// ─── Overview Tab ───────────────────────────────────────
+function OverviewTab() {
+  return (
+    <div className="space-y-12">
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">What is ClawBack?</h2>
+        <p className="text-muted-foreground leading-relaxed max-w-3xl">
+          AI agents are increasingly autonomous — they can browse, code, analyze data, and interact with APIs.
+          But when two agents need to transact, there's no trust infrastructure. How does Agent A guarantee payment?
+          How does Agent B guarantee delivery? What happens when things go wrong?
+        </p>
+        <p className="text-muted-foreground leading-relaxed max-w-3xl mt-4">
+          <span className="text-foreground font-medium">ClawBack</span> is a trustless USDC escrow system for
+          agent-to-agent payments on Base. It puts trust in the code, not the counterparty.
+        </p>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">How It Works</h2>
+        <FlowDiagram />
+        <div className="space-y-3 max-w-3xl mt-6">
+          {[
+            ['Create', 'Agent A locks USDC in a smart contract escrow with a deadline and description.'],
+            ['Deliver', 'Agent B performs the agreed service.'],
+            ['Release', 'Agent A verifies and releases funds to Agent B.'],
+            ['Dispute', 'Either party opens a dispute, an AI arbiter makes the final call.'],
+            ['Expire', 'Funds auto-return to depositor after deadline (safety net).'],
+          ].map(([step, desc], i) => (
+            <div key={step} className="flex gap-3">
+              <span className="text-accent font-mono text-sm mt-0.5">{i + 1}.</span>
+              <p className="text-muted-foreground text-sm">
+                <span className="text-foreground font-medium">{step}</span> — {desc}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">Escrow States</h2>
+        <StateDiagram />
+        <div className="overflow-x-auto mt-6">
+          <table className="w-full max-w-2xl text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Value</th>
+                <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Name</th>
+                <th className="text-left py-2 text-muted-foreground font-medium">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground">
+              {[
+                [0, 'Active', 'Escrow is active, funds are locked'],
+                [1, 'Released', 'Funds released to beneficiary'],
+                [2, 'Disputed', 'Dispute is open, awaiting arbiter resolution'],
+                [3, 'Refunded', 'Funds refunded to depositor (via dispute resolution)'],
+                [4, 'Expired', 'Deadline passed, depositor reclaimed funds'],
+              ].map(([val, name, desc]) => (
+                <tr key={String(val)} className="border-b border-border/50">
+                  <td className="py-2 pr-4 font-mono text-accent">{val}</td>
+                  <td className="py-2 pr-4 text-foreground font-medium">{name}</td>
+                  <td className="py-2">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">Architecture</h2>
+        <ArchitectureDiagram />
+      </section>
+
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">Tech Stack</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {[
+            { name: 'Smart Contract', desc: 'Solidity ^0.8.20, Foundry' },
+            { name: 'Backend', desc: 'Bun, Hono, ethers.js v6' },
+            { name: 'Frontend', desc: 'React 18, Vite, TailwindCSS' },
+            { name: 'Agent Skill', desc: 'Bash scripts (curl + jq)' },
+            { name: 'Network', desc: 'Base Sepolia (testnet)' },
+            { name: 'Token', desc: 'USDC (6 decimals)' },
+          ].map((item) => (
+            <div key={item.name} className="bg-surface-raised rounded-lg border border-border p-4">
+              <h3 className="text-sm font-semibold text-foreground">{item.name}</h3>
+              <p className="text-xs text-muted-foreground mt-1">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── Developers Tab ─────────────────────────────────────
+function MethodBadge({ method }: { method: string }) {
+  const isPost = method === 'POST';
+  return (
+    <span className={cn(
+      'inline-flex items-center px-2 py-0.5 rounded text-xs font-mono font-bold',
+      isPost ? 'bg-accent/20 text-accent' : 'bg-[#c27c5e]/20 text-[#c27c5e]'
+    )}>
+      {method}
+    </span>
+  );
+}
+
+function AuthBadge() {
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-mono bg-surface-overlay text-muted-foreground border border-border">
+      Auth
+    </span>
+  );
+}
+
+function Endpoint({ method, path, auth, description, request, response, curl }: {
+  method: string;
+  path: string;
+  auth?: boolean;
+  description: string;
+  request?: string;
+  response: string;
+  curl: string;
+}) {
+  return (
+    <div className="bg-surface-raised rounded-lg border border-border p-6 space-y-4">
+      <div className="flex items-center gap-2 flex-wrap">
+        <MethodBadge method={method} />
+        <code className="text-sm font-mono text-foreground">{path}</code>
+        {auth && <AuthBadge />}
+      </div>
+      <p className="text-sm text-muted-foreground">{description}</p>
+      {request && <CodeBlock code={request} language="json" title="Request Body" />}
+      <CodeBlock code={response} language="json" title="Response" />
+      <CodeBlock code={curl} language="bash" title="curl" />
+    </div>
+  );
+}
+
+function DevelopersTab() {
+  return (
+    <div className="space-y-12">
+      {/* Quick Start */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">Quick Start</h2>
+        <div className="space-y-6 max-w-3xl">
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Prerequisites</h3>
+            <ul className="list-disc list-inside text-sm text-muted-foreground space-y-1">
+              <li><a href="https://bun.sh" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Bun</a> runtime</li>
+              <li><a href="https://getfoundry.sh" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">Foundry</a> for smart contracts</li>
+              <li>Base Sepolia ETH (from faucet)</li>
+              <li>Base Sepolia USDC (from <a href="https://faucet.circle.com" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">faucet.circle.com</a>)</li>
+            </ul>
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Environment Setup</h3>
+            <CodeBlock code={`cp .env.example .env\n# Edit .env with your private key and other values`} language="bash" />
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Deploy Contract</h3>
+            <CodeBlock code={`cd contracts\nforge build\nforge create --rpc-url https://sepolia.base.org \\\n  --private-key $PRIVATE_KEY \\\n  src/USDCEscrow.sol:USDCEscrow \\\n  --constructor-args 0x036CbD53842c5426634e7929541eC2318f3dCF7e`} language="bash" />
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Run Backend</h3>
+            <CodeBlock code={`cd backend\nbun install\nbun run src/index.ts`} language="bash" />
+          </div>
+
+          <div>
+            <h3 className="text-lg font-semibold text-foreground mb-2">Run Frontend</h3>
+            <CodeBlock code={`cd frontend\nbun install\nbun run dev`} language="bash" />
+          </div>
+        </div>
+      </section>
+
+      {/* API Reference */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">API Reference</h2>
+        <p className="text-sm text-muted-foreground mb-6">
+          Base URL: <code className="text-accent">{'${ESCROW_API_URL}'}/api</code> — Protected endpoints require <code className="text-accent">X-API-Key</code> header.
+        </p>
+
+        <div className="space-y-6">
+          <Endpoint
+            method="POST"
+            path="/api/escrows"
+            auth
+            description="Creates a new USDC escrow on Base Sepolia. The server wallet approves USDC spending and calls the smart contract to lock funds."
+            request={`{
+  "beneficiary": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28",
+  "amount": 10.5,
+  "description": "Payment for data analysis",
+  "deadline_hours": 48
+}`}
+            response={`{
+  "message": "Escrow created successfully",
+  "escrowId": 1,
+  "txHash": "0xabc123..."
+}`}
+            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: \${ESCROW_API_KEY}" \\
+  -d '{
+    "beneficiary": "0x742d...",
+    "amount": 10,
+    "description": "Payment for data analysis",
+    "deadline_hours": 48
+  }' | jq .`}
+          />
+
+          <Endpoint
+            method="GET"
+            path="/api/escrows"
+            description="Retrieve all escrows with optional filtering. Query params: state, depositor, beneficiary."
+            response={`{
+  "escrows": [
+    {
+      "id": 1,
+      "depositor": "0x...",
+      "beneficiary": "0x...",
+      "amount": "10.5",
+      "state": 0,
+      "stateName": "Active"
+    }
+  ],
+  "count": 1
+}`}
+            curl={`curl -s "\${ESCROW_API_URL}/api/escrows" | jq .`}
+          />
+
+          <Endpoint
+            method="GET"
+            path="/api/escrows/:id"
+            description="Retrieve details of a specific escrow by ID."
+            response={`{
+  "id": 1,
+  "depositor": "0x...",
+  "beneficiary": "0x...",
+  "amount": "10.5",
+  "state": 0,
+  "stateName": "Active"
+}`}
+            curl={`curl -s "\${ESCROW_API_URL}/api/escrows/1" | jq .`}
+          />
+
+          <Endpoint
+            method="POST"
+            path="/api/escrows/:id/release"
+            auth
+            description="Release escrowed USDC to the beneficiary. Only the depositor can release."
+            response={`{
+  "message": "Escrow released successfully",
+  "txHash": "0xdef456..."
+}`}
+            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/release" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: \${ESCROW_API_KEY}" | jq .`}
+          />
+
+          <Endpoint
+            method="POST"
+            path="/api/escrows/:id/dispute"
+            auth
+            description="Open a dispute on an active escrow. Either the depositor or beneficiary can dispute."
+            response={`{
+  "message": "Escrow disputed successfully",
+  "txHash": "0xghi789..."
+}`}
+            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/dispute" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: \${ESCROW_API_KEY}" | jq .`}
+          />
+
+          <Endpoint
+            method="POST"
+            path="/api/escrows/:id/resolve"
+            auth
+            description="Resolve a disputed escrow. Only the arbiter (server wallet) can resolve. Funds sent to beneficiary or refunded."
+            request={`{
+  "release_to_beneficiary": true
+}`}
+            response={`{
+  "message": "Dispute resolved successfully",
+  "txHash": "0xjkl012..."
+}`}
+            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/resolve" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: \${ESCROW_API_KEY}" \\
+  -d '{"release_to_beneficiary": true}' | jq .`}
+          />
+
+          <Endpoint
+            method="POST"
+            path="/api/escrows/:id/claim-expired"
+            auth
+            description="Reclaim funds from an expired escrow. Only the depositor can claim after the deadline has passed."
+            response={`{
+  "message": "Expired escrow claimed",
+  "txHash": "0xmno345..."
+}`}
+            curl={`curl -s -X POST "\${ESCROW_API_URL}/api/escrows/1/claim-expired" \\
+  -H "Content-Type: application/json" \\
+  -H "X-API-Key: \${ESCROW_API_KEY}" | jq .`}
+          />
+        </div>
+      </section>
+
+      {/* WebSocket */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">WebSocket</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Real-time escrow events via WebSocket at <code className="text-accent">ws://{'${ESCROW_API_URL}'}/ws</code>
+        </p>
+        <CodeBlock
+          code={`{
+  "type": "EscrowCreated",
+  "escrowId": 1,
+  "timestamp": "2025-01-15T12:00:00.000Z",
+  "data": {
+    "depositor": "0x...",
+    "beneficiary": "0x...",
+    "amount": "10.5",
+    "deadline": 1737115200
+  },
+  "txHash": "0xabc123..."
+}`}
+          language="json"
+          title="Event Format"
+        />
+        <div className="overflow-x-auto mt-4">
+          <table className="w-full max-w-xl text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Type</th>
+                <th className="text-left py-2 text-muted-foreground font-medium">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground">
+              {[
+                ['EscrowCreated', 'A new escrow was created'],
+                ['EscrowReleased', 'Funds were released to the beneficiary'],
+                ['EscrowDisputed', 'A dispute was opened'],
+                ['EscrowResolved', 'A dispute was resolved by the arbiter'],
+                ['EscrowExpired', 'An expired escrow was claimed by the depositor'],
+              ].map(([type, desc]) => (
+                <tr key={type} className="border-b border-border/50">
+                  <td className="py-2 pr-4 font-mono text-accent">{type}</td>
+                  <td className="py-2">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* OpenClaw Skill */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">OpenClaw Skill</h2>
+        <p className="text-sm text-muted-foreground mb-4">
+          Any AI agent can interact with ClawBack using these 7 bash commands:
+        </p>
+        <div className="space-y-3">
+          <CodeBlock code={'./scripts/create-escrow.sh <beneficiary_address> <amount_usdc> "<description>" <deadline_hours>'} language="bash" title="Create Escrow" />
+          <CodeBlock code={'./scripts/list-escrows.sh [--state active|released|disputed|refunded|expired] [--depositor 0x...]'} language="bash" title="List Escrows" />
+          <CodeBlock code={'./scripts/get-escrow.sh <escrow_id>'} language="bash" title="Get Escrow" />
+          <CodeBlock code={'./scripts/release-escrow.sh <escrow_id>'} language="bash" title="Release Escrow" />
+          <CodeBlock code={'./scripts/dispute-escrow.sh <escrow_id>'} language="bash" title="Dispute Escrow" />
+          <CodeBlock code={'./scripts/resolve-dispute.sh <escrow_id> <true|false>'} language="bash" title="Resolve Dispute" />
+          <CodeBlock code={'./scripts/claim-expired.sh <escrow_id>'} language="bash" title="Claim Expired" />
+        </div>
+      </section>
+
+      {/* Network Details */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-4">Network Details</h2>
+        <div className="bg-surface-raised rounded-lg border border-border p-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+            {[
+              ['Chain', 'Base Sepolia (testnet)'],
+              ['Chain ID', '84532'],
+              ['USDC Contract', '0x036CbD53842c5426634e7929541eC2318f3dCF7e'],
+              ['USDC Decimals', '6'],
+              ['RPC', 'https://sepolia.base.org'],
+            ].map(([label, value]) => (
+              <div key={label}>
+                <span className="text-muted-foreground">{label}</span>
+                <p className="font-mono text-foreground text-xs mt-0.5 break-all">{value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── A2A Tab ────────────────────────────────────────────
+function A2ATab() {
+  return (
+    <div className="space-y-12">
+      {/* Hero banner */}
+      <section className="text-center py-8">
+        <img src="/crabs-double-bigger.PNG" className="h-24 mx-auto mb-4" alt="ClawBack crabs" />
+        <h2 className="text-2xl font-bold text-foreground">Where AI Agents Shake Hands</h2>
+        <p className="text-muted-foreground mt-2">Trustless escrow for the agentic economy</p>
+      </section>
+
+      {/* The Problem */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-6">The Problem</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { title: 'No Payment Guarantee', desc: 'Agent B delivers work but may never get paid. There\'s no mechanism to enforce payment after delivery.' },
+            { title: 'No Refund Mechanism', desc: 'Agent A pays upfront with no recourse if work isn\'t done. Prepayment means total exposure to non-delivery.' },
+            { title: 'No Dispute Resolution', desc: 'When things go wrong, there\'s no impartial arbiter. Agents have no way to resolve disagreements fairly.' },
+          ].map((item) => (
+            <div key={item.title} className="bg-surface-raised rounded-lg border border-border p-6">
+              <h3 className="text-sm font-semibold text-[#c27c5e] mb-2">{item.title}</h3>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* The Solution */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-6">The Solution</h2>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4">
+          {['Deposit', 'Verify', 'Release'].map((step, i) => (
+            <div key={step} className="flex items-center gap-4">
+              <div className="bg-accent/10 border border-accent rounded-lg px-6 py-4 text-center min-w-[120px]">
+                <span className="text-accent font-mono text-xs block mb-1">{i + 1}</span>
+                <span className="text-foreground font-semibold">{step}</span>
+              </div>
+              {i < 2 && (
+                <span className="text-muted-foreground text-2xl hidden md:block">&rarr;</span>
+              )}
+            </div>
+          ))}
+        </div>
+        <p className="text-center text-muted-foreground text-sm mt-6">
+          Or dispute and let the AI arbiter decide.
+        </p>
+      </section>
+
+      {/* Use Cases */}
+      <section>
+        <h2 className="text-xl font-bold text-foreground mb-6">Use Cases</h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {[
+            { title: 'Data Analysis', desc: 'Agent A commissions Agent B for sentiment analysis. Funds locked until results verified.' },
+            { title: 'Code Generation', desc: 'Agent A requests a smart contract. Payment held in escrow until code passes tests.' },
+            { title: 'Content Creation', desc: 'Agent A hires Agent B for content. Released on delivery, disputed if quality is lacking.' },
+          ].map((item) => (
+            <div key={item.title} className="bg-surface-raised rounded-lg border border-border p-6">
+              <h3 className="text-sm font-semibold text-accent mb-2">{item.title}</h3>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* CTA */}
+      <section className="text-center py-8">
+        <p className="text-lg font-semibold text-foreground mb-2">Trustless. Automatic. No humans needed.</p>
+        <p className="text-sm text-muted-foreground mb-6">The missing trust layer for agent commerce.</p>
+        <div className="flex gap-4 justify-center">
+          <Button asChild>
+            <Link to="/dashboard">Open Dashboard</Link>
+          </Button>
+          <Button asChild variant="outline">
+            <Link to="/docs#developers" onClick={() => window.location.hash = 'developers'}>
+              Read the Docs
+            </Link>
+          </Button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+// ─── FAQ Tab ────────────────────────────────────────────
+function FAQTab() {
+  const [openIndex, setOpenIndex] = useState<number | null>(null);
+
+  return (
+    <div className="max-w-3xl space-y-2">
+      {FAQ_ITEMS.map((item, i) => {
+        const isOpen = openIndex === i;
+        return (
+          <div key={i} className="border border-border rounded-lg overflow-hidden">
+            <button
+              onClick={() => setOpenIndex(isOpen ? null : i)}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-surface-overlay/30 transition-colors"
+            >
+              <span className="text-sm font-medium text-foreground">{item.q}</span>
+              <ChevronDown className={cn(
+                'h-4 w-4 text-muted-foreground shrink-0 ml-4 transition-transform duration-200',
+                isOpen && 'rotate-180'
+              )} />
+            </button>
+            <AnimatePresence>
+              {isOpen && (
+                <motion.div
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: 'auto', opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="overflow-hidden"
+                >
+                  <p className="px-5 pb-4 text-sm text-muted-foreground leading-relaxed">
+                    {item.a}
+                  </p>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+        );
+      })}
+    </div>
+  );
+}

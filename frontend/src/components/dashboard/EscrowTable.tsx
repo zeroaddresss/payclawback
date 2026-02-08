@@ -56,9 +56,10 @@ export default function EscrowTable() {
       </CardHeader>
       <CardContent>
         {escrows.length === 0 ? (
-          <p className="py-10 text-center text-muted-foreground">
-            No escrows found
-          </p>
+          <div className="py-10 flex flex-col items-center justify-center">
+            <img src="/logo-no-bg.png" className="h-16 w-16 opacity-30 mb-4" alt="" />
+            <p className="text-muted-foreground">No escrows yet</p>
+          </div>
         ) : (
           <Table>
             <TableHeader>
@@ -74,7 +75,7 @@ export default function EscrowTable() {
             </TableHeader>
             <TableBody>
               {escrows.map((e) => (
-                <TableRow key={e.id}>
+                <TableRow key={e.id} className="hover:bg-surface-overlay/50">
                   <TableCell className="font-mono tabular-nums text-muted-foreground">
                     #{e.id}
                   </TableCell>
