@@ -9,6 +9,9 @@ import { Button } from '@/components/ui/button';
 import FlowDiagram from '@/components/docs/FlowDiagram';
 import StateDiagram from '@/components/docs/StateDiagram';
 import ArchitectureDiagram from '@/components/docs/ArchitectureDiagram';
+import ContractStructureDiagram from '@/components/docs/ContractStructureDiagram';
+import AccessControlDiagram from '@/components/docs/AccessControlDiagram';
+import AgentInteractionDiagram from '@/components/docs/AgentInteractionDiagram';
 
 const TABS = ['overview', 'developers', 'a2a', 'faq'] as const;
 type Tab = (typeof TABS)[number];
@@ -456,6 +459,149 @@ function DevelopersTab() {
           <CodeBlock code={'./scripts/dispute-escrow.sh <escrow_id>'} language="bash" title="Dispute Escrow" />
           <CodeBlock code={'./scripts/resolve-dispute.sh <escrow_id> <true|false>'} language="bash" title="Resolve Dispute" />
           <CodeBlock code={'./scripts/claim-expired.sh <escrow_id>'} language="bash" title="Claim Expired" />
+        </div>
+      </section>
+
+      {/* Smart Contracts */}
+      <section id="smart-contracts">
+        <h2 className="text-xl font-bold text-foreground mb-4">Smart Contracts</h2>
+        <p className="text-sm text-muted-foreground mb-6 max-w-3xl">
+          <code className="text-accent">USDCEscrow.sol</code> is a 136-line Solidity contract that manages the full escrow lifecycle on Base. It holds USDC tokens in escrow, enforces access control via <code className="text-accent">require()</code> statements, and emits events for every state transition.
+        </p>
+
+        <h3 className="text-lg font-semibold text-foreground mb-3">Contract Architecture</h3>
+        <ContractStructureDiagram />
+
+        <h3 className="text-lg font-semibold text-foreground mb-3 mt-8">Escrow Struct</h3>
+        <div className="overflow-x-auto mb-8">
+          <table className="w-full max-w-2xl text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Field</th>
+                <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Type</th>
+                <th className="text-left py-2 text-muted-foreground font-medium">Description</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground">
+              {[
+                ['id', 'uint256', 'Auto-incremented escrow identifier'],
+                ['depositor', 'address', 'Agent who locked the funds'],
+                ['beneficiary', 'address', 'Agent who receives funds on release'],
+                ['arbiter', 'address', 'Contract owner — resolves disputes'],
+                ['amount', 'uint256', 'USDC amount locked (6 decimals)'],
+                ['description', 'string', 'Human/agent-readable escrow purpose'],
+                ['deadline', 'uint256', 'Unix timestamp — expiry cutoff'],
+                ['state', 'EscrowState', 'Current lifecycle state (0–4)'],
+                ['createdAt', 'uint256', 'Unix timestamp — creation time'],
+              ].map(([field, type, desc]) => (
+                <tr key={field} className="border-b border-border/50">
+                  <td className="py-2 pr-4 font-mono text-accent">{field}</td>
+                  <td className="py-2 pr-4 font-mono text-foreground">{type}</td>
+                  <td className="py-2">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h3 className="text-lg font-semibold text-foreground mb-3">Access Control</h3>
+        <AccessControlDiagram />
+
+        <h3 className="text-lg font-semibold text-foreground mb-3 mt-8">Agent Interaction Flow</h3>
+        <AgentInteractionDiagram />
+
+        <h3 className="text-lg font-semibold text-foreground mb-3 mt-8">Function Reference</h3>
+        <div className="space-y-4">
+          {[
+            {
+              sig: 'createEscrow(address beneficiary, uint256 amount, string description, uint256 deadlineTimestamp) → uint256',
+              access: 'Anyone',
+              state: 'N/A (creates new)',
+              events: 'EscrowCreated(id, depositor, beneficiary, amount, deadline)',
+            },
+            {
+              sig: 'release(uint256 id)',
+              access: 'Depositor OR Arbiter',
+              state: 'Active',
+              events: 'EscrowReleased(id, beneficiary, amount)',
+            },
+            {
+              sig: 'dispute(uint256 id)',
+              access: 'Depositor OR Beneficiary',
+              state: 'Active',
+              events: 'EscrowDisputed(id, disputedBy)',
+            },
+            {
+              sig: 'resolveDispute(uint256 id, bool releaseToBeneficiary)',
+              access: 'Arbiter only',
+              state: 'Disputed',
+              events: 'EscrowResolved(id, releasedToBeneficiary, amount)',
+            },
+            {
+              sig: 'claimExpired(uint256 id)',
+              access: 'Anyone (after deadline)',
+              state: 'Active',
+              events: 'EscrowExpired(id, depositor, amount)',
+            },
+            {
+              sig: 'getEscrow(uint256 id) → Escrow memory',
+              access: 'Anyone (view)',
+              state: 'Any',
+              events: 'None',
+            },
+            {
+              sig: 'getEscrowCount() → uint256',
+              access: 'Anyone (view)',
+              state: 'Any',
+              events: 'None',
+            },
+          ].map((fn) => (
+            <div key={fn.sig} className="bg-surface-raised rounded-lg border border-border p-6">
+              <code className="text-sm font-mono text-accent break-all">{fn.sig}</code>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Access</span>
+                  <p className="text-foreground font-medium mt-0.5">{fn.access}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Required State</span>
+                  <p className="text-foreground font-medium mt-0.5">{fn.state}</p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Emits</span>
+                  <p className="font-mono text-foreground text-xs mt-0.5 break-all">{fn.events}</p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        <h3 className="text-lg font-semibold text-foreground mb-3 mt-8">Events</h3>
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="border-b border-border">
+                <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Event</th>
+                <th className="text-left py-2 pr-4 text-muted-foreground font-medium">Parameters</th>
+                <th className="text-left py-2 text-muted-foreground font-medium">Emitted By</th>
+              </tr>
+            </thead>
+            <tbody className="text-muted-foreground">
+              {[
+                ['EscrowCreated', 'id (indexed), depositor (indexed), beneficiary (indexed), amount, deadline', 'createEscrow()'],
+                ['EscrowReleased', 'id (indexed), beneficiary (indexed), amount', 'release()'],
+                ['EscrowDisputed', 'id (indexed), disputedBy (indexed)', 'dispute()'],
+                ['EscrowResolved', 'id (indexed), releasedToBeneficiary, amount', 'resolveDispute()'],
+                ['EscrowExpired', 'id (indexed), depositor (indexed), amount', 'claimExpired()'],
+              ].map(([event, params, emitter]) => (
+                <tr key={event} className="border-b border-border/50">
+                  <td className="py-2 pr-4 font-mono text-accent">{event}</td>
+                  <td className="py-2 pr-4 font-mono text-xs">{params}</td>
+                  <td className="py-2 font-mono text-foreground">{emitter}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </section>
 

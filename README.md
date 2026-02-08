@@ -1,24 +1,28 @@
+<div align="center">
+
 # ClawBack
 
 **The missing trust layer for agent commerce.**
 
-Trustless USDC escrow system for agent-to-agent payments on Base. Built for the [OpenClaw USDC Hackathon](https://openclaw.com) — Agentic Commerce track.
+[Live App](https://payclawback.xyz) · [Documentation](https://payclawback.xyz/docs) · [API Reference](https://payclawback.xyz/docs#developers)
 
-**Live at [payclawback.xyz](https://payclawback.xyz)**
+![Tests](https://img.shields.io/badge/tests-59_passing-22c55e) ![Coverage](https://img.shields.io/badge/coverage-97%25_branch-22c55e) ![Trail of Bits](https://img.shields.io/badge/Trail_of_Bits-2.3%2F4.0-c27c5e) ![Base](https://img.shields.io/badge/chain-Base-4a9090) ![USDC](https://img.shields.io/badge/token-USDC-2775CA)
 
-## Architecture
+</div>
 
-```
-┌─────────────┐     ┌─────────────────┐     ┌──────────────┐
-│  AI Agent    │────▶│  Backend API    │────▶│  Smart       │
-│  (Skill)     │◀────│  (Bun + Hono)   │◀────│  Contract    │
-└─────────────┘     └────────┬────────┘     │  (Solidity)  │
-                             │              └──────┬───────┘
-                    ┌────────▼────────┐            │
-                    │  Frontend       │     ┌──────▼───────┐
-                    │  (React + Vite) │     │  Base + USDC │
-                    └─────────────────┘     └──────────────┘
-```
+---
+
+## Why ClawBack
+
+AI agents transact billions, but there's zero trust infrastructure. No payment guarantee, no delivery guarantee, no dispute resolution. When Agent A pays Agent B, it's pure faith — and faith doesn't scale.
+
+ClawBack locks USDC in an on-chain escrow smart contract. Funds release only when the depositor confirms delivery or an AI arbiter resolves a dispute. Deadlines prevent funds from being locked forever. It's the handshake protocol for the agentic economy.
+
+- **On-chain USDC escrow** with 5-state lifecycle
+- **AI arbiter** for impartial dispute resolution
+- **REST API + WebSocket** for real-time integration
+- **OpenClaw skill** with 7 bash commands for any agent
+- **59 tests**, 97% branch coverage
 
 ## How It Works
 
@@ -28,50 +32,137 @@ Trustless USDC escrow system for agent-to-agent payments on Base. Built for the 
 4. **Dispute** — Either party opens a dispute, an AI arbiter makes the final call
 5. **Expire** — Funds auto-return to depositor after deadline (safety net)
 
-## Quick Start
+## Architecture
 
-### Prerequisites
-- [Bun](https://bun.sh) runtime
-- [Foundry](https://getfoundry.sh) for smart contracts
-- Base ETH for gas
-- Base USDC
+```mermaid
+graph TB
+    subgraph agents["AI Agents"]
+        A["Agent A<br/>(Depositor)"]
+        B["Agent B<br/>(Beneficiary)"]
+    end
 
-### 1. Setup Environment
-```bash
-cp .env.example .env
-# Edit .env with your private key and other values
+    subgraph skill["OpenClaw Skill"]
+        S["7 Bash Scripts<br/>create · release · dispute<br/>resolve · claim · list · get"]
+    end
+
+    subgraph backend["Backend"]
+        API["REST API<br/>Bun + Hono + ethers.js v6"]
+        WS["WebSocket<br/>Real-time events"]
+    end
+
+    subgraph onchain["Base Onchain"]
+        SC["USDCEscrow.sol"]
+        USDC["USDC Token"]
+    end
+
+    subgraph frontend["Frontend"]
+        DASH["React Dashboard<br/>Vite + TailwindCSS"]
+    end
+
+    A --> S
+    B --> S
+    S --> API
+    API --> SC
+    SC --> USDC
+    DASH --> API
+    API -.-> WS
 ```
 
-### 2. Deploy Contract
-```bash
-cd contracts
-forge build
-forge create --rpc-url https://mainnet.base.org \
-  --private-key $PRIVATE_KEY \
-  src/USDCEscrow.sol:USDCEscrow \
-  --constructor-args 0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913
-# Copy the deployed contract address to .env CONTRACT_ADDRESS
+## Escrow State Machine
+
+```mermaid
+stateDiagram-v2
+    [*] --> Active: createEscrow()<br/>depositor · amount > 0
+
+    Active --> Released: release()<br/>depositor OR arbiter · state == Active
+    Active --> Disputed: dispute()<br/>depositor OR beneficiary · state == Active
+    Active --> Expired: claimExpired()<br/>anyone · block.timestamp > deadline
+
+    Disputed --> Released: resolveDispute(true)<br/>arbiter only · state == Disputed
+    Disputed --> Refunded: resolveDispute(false)<br/>arbiter only · state == Disputed
+
+    Released --> [*]
+    Refunded --> [*]
+    Expired --> [*]
 ```
 
-### 3. Run Backend
-```bash
-cd backend
-bun install
-bun run src/index.ts
+## For Agents
+
+> This section is written for you, the AI agent reading this README.
+
+### API Base URL
+
+```
+https://api.payclawback.xyz/api
 ```
 
-### 4. Run Frontend
-```bash
-cd frontend
-bun install
-bun run dev
+### Authentication
+
+Write endpoints require an `X-API-Key` header. Read endpoints are public.
+
+```
+X-API-Key: your-api-key
 ```
 
-### 5. Run Tests
+### Endpoints
+
+| Method | Path | Auth | Description |
+|--------|------|------|-------------|
+| `POST` | `/api/escrows` | Yes | Create a new USDC escrow |
+| `GET` | `/api/escrows` | No | List all escrows (filter by state, depositor, beneficiary) |
+| `GET` | `/api/escrows/:id` | No | Get escrow details by ID |
+| `POST` | `/api/escrows/:id/release` | Yes | Release funds to beneficiary |
+| `POST` | `/api/escrows/:id/dispute` | Yes | Open a dispute on active escrow |
+| `POST` | `/api/escrows/:id/resolve` | Yes | Resolve dispute (arbiter only) |
+| `POST` | `/api/escrows/:id/claim-expired` | Yes | Reclaim funds after deadline |
+| `GET` | `/api/stats` | No | Escrow statistics |
+
+### Quick Start: Pay Another Agent
+
 ```bash
-cd contracts
-forge test
+# 1. Create an escrow — lock 10 USDC for Agent B with a 48-hour deadline
+curl -s -X POST "https://api.payclawback.xyz/api/escrows" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-api-key" \
+  -d '{
+    "beneficiary": "0x742d35Cc6634C0532925a3b844Bc9e7595f2bD28",
+    "amount": 10,
+    "description": "Payment for data analysis",
+    "deadline_hours": 48
+  }' | jq .
+
+# 2. Check the escrow status
+curl -s "https://api.payclawback.xyz/api/escrows/1" | jq .
+
+# 3. Release funds after verifying delivery
+curl -s -X POST "https://api.payclawback.xyz/api/escrows/1/release" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: your-api-key" | jq .
 ```
+
+### OpenClaw Skill Commands
+
+```bash
+./scripts/create-escrow.sh <beneficiary> <amount_usdc> "<description>" <deadline_hours>
+./scripts/list-escrows.sh [--state active|released|disputed|refunded|expired] [--depositor 0x...]
+./scripts/get-escrow.sh <escrow_id>
+./scripts/release-escrow.sh <escrow_id>
+./scripts/dispute-escrow.sh <escrow_id>
+./scripts/resolve-dispute.sh <escrow_id> <true|false>
+./scripts/claim-expired.sh <escrow_id>
+```
+
+### WebSocket
+
+Connect to `wss://api.payclawback.xyz/ws` for real-time escrow events:
+
+| Event | Description |
+|-------|-------------|
+| `EscrowCreated` | New escrow created |
+| `EscrowReleased` | Funds released to beneficiary |
+| `EscrowDisputed` | Dispute opened |
+| `EscrowResolved` | Dispute resolved by arbiter |
+| `EscrowExpired` | Expired escrow claimed |
 
 ## Tech Stack
 
@@ -95,14 +186,10 @@ forge test
 | Invariant Tests | 3 | Conservation of funds, counter consistency, no fund leaks |
 | **Total** | **59** | **97% branch coverage** |
 
-## API Reference
-
-See [skill/references/api-docs.md](skill/references/api-docs.md) for the full API documentation, or visit [payclawback.xyz/docs](https://payclawback.xyz/docs).
-
 ## Project Structure
 
 ```
-├── contracts/          # Foundry project - USDCEscrow.sol
+├── contracts/          # Foundry project — USDCEscrow.sol
 │   ├── src/            # Smart contract source
 │   └── test/           # Contract tests (59 tests)
 ├── backend/            # Bun + Hono REST API
@@ -128,6 +215,15 @@ See [skill/references/api-docs.md](skill/references/api-docs.md) for the full AP
 - Checks-effects-interactions pattern throughout
 - Rate limiting on write endpoints
 - Configurable CORS
+
+## Network Details
+
+| Property | Value |
+|----------|-------|
+| Chain | Base |
+| Chain ID | 8453 |
+| USDC Contract | `0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913` |
+| USDC Decimals | 6 |
 
 ## License
 
